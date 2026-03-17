@@ -1,5 +1,5 @@
 <script lang="ts">
-import { PropType } from "vue";
+import type { PropType } from "vue";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ChevronRight, Folder, FolderOpen, File, Check } from "lucide-vue-next";
 
@@ -23,10 +23,19 @@ export default {
   props: {
     options: { type: Array as PropType<Option[]>, required: true },
     level: { type: Number, required: true },
-    isSelected: { type: Function as PropType<(value: any) => boolean>, required: true },
-    toggleSelect: { type: Function as PropType<(opt: Option) => void>, required: true },
+    isSelected: {
+      type: Function as PropType<(value: any) => boolean>,
+      required: true,
+    },
+    toggleSelect: {
+      type: Function as PropType<(opt: Option) => void>,
+      required: true,
+    },
     expanded: { type: Set as PropType<Set<any>>, required: true },
-    toggleExpand: { type: Function as PropType<(value: any) => void>, required: true },
+    toggleExpand: {
+      type: Function as PropType<(value: any) => void>,
+      required: true,
+    },
     multiple: { type: Boolean, required: true },
     disableBranchNodes: { type: Boolean, required: true },
   },
@@ -71,14 +80,19 @@ export default {
             v-else-if="opt.children?.length && expanded.has(opt.value)"
             class="h-4 w-4 text-blue-600"
           />
-          <CircleArrowRight v-else class="h-3.5 w-3.5 text-muted-foreground/60" />
+          <CircleArrowRight
+            v-else
+            class="h-3.5 w-3.5 text-muted-foreground/60"
+          />
         </div>
 
         <!-- Selection Area -->
         <div
           class="flex items-center gap-3 flex-1 min-w-0"
           @click="
-            !opt.disabled && !(disableBranchNodes && opt.children?.length) && toggleSelect(opt)
+            !opt.disabled &&
+            !(disableBranchNodes && opt.children?.length) &&
+            toggleSelect(opt)
           "
         >
           <!-- Checkbox for Multiple Selection -->
@@ -90,8 +104,14 @@ export default {
           />
 
           <!-- Check Icon for Single Selection -->
-          <div v-else-if="!multiple" class="flex items-center justify-center w-4 h-4 flex-shrink-0">
-            <Check v-if="isSelected(opt.value)" class="h-3.5 w-3.5 text-primary font-semibold" />
+          <div
+            v-else-if="!multiple"
+            class="flex items-center justify-center w-4 h-4 flex-shrink-0"
+          >
+            <Check
+              v-if="isSelected(opt.value)"
+              class="h-3.5 w-3.5 text-primary font-semibold"
+            />
           </div>
 
           <!-- Label -->
@@ -122,7 +142,10 @@ export default {
       </div>
 
       <!-- Children Nodes with Animation -->
-      <div v-if="opt.children && expanded.has(opt.value)" class="overflow-hidden">
+      <div
+        v-if="opt.children && expanded.has(opt.value)"
+        class="overflow-hidden"
+      >
         <TreeNode
           :options="opt.children"
           :level="level + 1"

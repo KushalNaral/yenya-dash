@@ -22,7 +22,11 @@ function hasFiles(obj: any): boolean {
 /**
  * Recursively converts an object to FormData.
  */
-function objectToFormData(obj: any, formData: FormData = new FormData(), parentKey: string = "") {
+function objectToFormData(
+  obj: any,
+  formData: FormData = new FormData(),
+  parentKey: string = "",
+) {
   for (const key in obj) {
     if (Object.prototype.hasOwnProperty.call(obj, key)) {
       const value = obj[key];
@@ -41,7 +45,11 @@ function objectToFormData(obj: any, formData: FormData = new FormData(), parentK
             formData.append(arrayKey, item === null ? "" : item);
           }
         });
-      } else if (typeof value === "object" && value !== null && !(value instanceof Date)) {
+      } else if (
+        typeof value === "object" &&
+        value !== null &&
+        !(value instanceof Date)
+      ) {
         objectToFormData(value, formData, propertyKey);
       } else {
         formData.append(propertyKey, value === null ? "" : value);
@@ -72,7 +80,9 @@ export function createBaseService<T, C, U>(endpoint: string) {
      * @param params Query parameters for filtering, sorting, etc.
      * @returns PaginatedResponse<T>
      */
-    async list(params: Record<string, any> = {}): Promise<PaginatedResponse<T>> {
+    async list(
+      params: Record<string, any> = {},
+    ): Promise<PaginatedResponse<T>> {
       try {
         const res = await apiClient.get<ApiResponse<T[]>>(`${endpoint}`, {
           params,
@@ -82,7 +92,11 @@ export function createBaseService<T, C, U>(endpoint: string) {
         console.log(res.data, "from baseService");
         return res.data as PaginatedResponse<T>;
       } catch (error: any) {
-        handleError(error, { showToast: false, showDetails: false, duration: 3000 });
+        handleError(error, {
+          showToast: false,
+          showDetails: false,
+          duration: 3000,
+        });
         throw error;
       }
     },
@@ -97,7 +111,11 @@ export function createBaseService<T, C, U>(endpoint: string) {
         const res = await apiClient.get<ApiResponse<T[]>>(`${endpoint}/all`);
         return handleResponse(res.data);
       } catch (error: any) {
-        handleError(error, { showToast: false, showDetails: false, duration: 3000 });
+        handleError(error, {
+          showToast: false,
+          showDetails: false,
+          duration: 3000,
+        });
         throw error;
       }
     },
@@ -113,7 +131,11 @@ export function createBaseService<T, C, U>(endpoint: string) {
         const res = await apiClient.get<ApiResponse<T>>(`${endpoint}/${id}`);
         return handleResponse(res.data);
       } catch (error: any) {
-        handleError(error, { showToast: false, showDetails: false, duration: 3000 });
+        handleError(error, {
+          showToast: false,
+          showDetails: false,
+          duration: 3000,
+        });
         throw error;
       }
     },
@@ -134,10 +156,18 @@ export function createBaseService<T, C, U>(endpoint: string) {
           config = { headers: { "Content-Type": "multipart/form-data" } };
         }
 
-        const res = await apiClient.post<ApiResponse<T>>(`${endpoint}`, payload, config);
+        const res = await apiClient.post<ApiResponse<T>>(
+          `${endpoint}`,
+          payload,
+          config,
+        );
         return handleResponse(res.data, false, false, { showToast: true });
       } catch (error: any) {
-        handleError(error, { showToast: true, showDetails: true, duration: 5000 });
+        handleError(error, {
+          showToast: true,
+          showDetails: true,
+          duration: 5000,
+        });
         throw error;
       }
     },
@@ -153,10 +183,24 @@ export function createBaseService<T, C, U>(endpoint: string) {
       try {
         let payload: any = data;
         let config = {};
-        const res = await apiClient.patch<ApiResponse<T>>(`${endpoint}/${id}`, payload, config);
+
+        if (hasFiles(data)) {
+          payload = objectToFormData(data);
+          config = { headers: { "Content-Type": "multipart/form-data" } };
+        }
+
+        const res = await apiClient.patch<ApiResponse<T>>(
+          `${endpoint}/${id}`,
+          payload,
+          config,
+        );
         return handleResponse(res.data, false, false, { showToast: true });
       } catch (error: any) {
-        handleError(error, { showToast: true, showDetails: true, duration: 5000 });
+        handleError(error, {
+          showToast: true,
+          showDetails: true,
+          duration: 5000,
+        });
         throw error;
       }
     },
@@ -169,10 +213,16 @@ export function createBaseService<T, C, U>(endpoint: string) {
      */
     async delete(id: number): Promise<void> {
       try {
-        const res = await apiClient.delete<ApiResponse<void>>(`${endpoint}/${id}`);
+        const res = await apiClient.delete<ApiResponse<void>>(
+          `${endpoint}/${id}`,
+        );
         handleResponse(res.data, false, false, { showToast: true });
       } catch (error: any) {
-        handleError(error, { showToast: true, showDetails: true, duration: 5000 });
+        handleError(error, {
+          showToast: true,
+          showDetails: true,
+          duration: 5000,
+        });
         throw error;
       }
     },
@@ -185,11 +235,19 @@ export function createBaseService<T, C, U>(endpoint: string) {
      * @returns T
      */
     async changeStatus(id: number, data: StatusUpdateData): Promise<void> {
+      console.log(data, "from baseService");
       try {
-        const res = await apiClient.patch<ApiResponse<void>>(`${endpoint}/${id}/status`, data);
+        const res = await apiClient.patch<ApiResponse<void>>(
+          `${endpoint}/${id}/status`,
+          data,
+        );
         handleResponse(res.data, false, false, { showToast: true });
       } catch (error: any) {
-        handleError(error, { showToast: true, showDetails: true, duration: 5000 });
+        handleError(error, {
+          showToast: true,
+          showDetails: true,
+          duration: 5000,
+        });
         throw error;
       }
     },
@@ -201,12 +259,22 @@ export function createBaseService<T, C, U>(endpoint: string) {
      * @param data The verification update data.
      * @returns void
      */
-    async updateVerificationStatus(id: number, data: VerificationUpdateData): Promise<void> {
+    async updateVerificationStatus(
+      id: number,
+      data: VerificationUpdateData,
+    ): Promise<void> {
       try {
-        const res = await apiClient.patch<ApiResponse<void>>(`${endpoint}/${id}/verify`, data);
+        const res = await apiClient.patch<ApiResponse<void>>(
+          `${endpoint}/${id}/verify`,
+          data,
+        );
         handleResponse(res.data, false, false, { showToast: true });
       } catch (error: any) {
-        handleError(error, { showToast: true, showDetails: true, duration: 5000 });
+        handleError(error, {
+          showToast: true,
+          showDetails: true,
+          duration: 5000,
+        });
         throw error;
       }
     },
@@ -221,12 +289,20 @@ export function createBaseService<T, C, U>(endpoint: string) {
      */
     async uploadExcel(data: FormData): Promise<void> {
       try {
-        const res = await apiClient.post<ApiResponse<void>>(`${endpoint}/import`, data, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
+        const res = await apiClient.post<ApiResponse<void>>(
+          `${endpoint}/import`,
+          data,
+          {
+            headers: { "Content-Type": "multipart/form-data" },
+          },
+        );
         handleResponse(res.data, false, false, { showToast: true });
       } catch (error: any) {
-        handleError(error, { showToast: true, showDetails: true, duration: 5000 });
+        handleError(error, {
+          showToast: true,
+          showDetails: true,
+          duration: 5000,
+        });
         throw error;
       }
     },
@@ -255,7 +331,11 @@ export function createBaseService<T, C, U>(endpoint: string) {
         globalThis.URL.revokeObjectURL(url);
         a.remove();
       } catch (error: any) {
-        handleError(error, { showToast: true, showDetails: true, duration: 5000 });
+        handleError(error, {
+          showToast: true,
+          showDetails: true,
+          duration: 5000,
+        });
         throw error;
       }
     },
@@ -264,14 +344,20 @@ export function createBaseService<T, C, U>(endpoint: string) {
      * Fetch static types from a custom sub-endpoint like 'types' or 'ownerships'
      * @param subEndpoint e.g., 'types', 'ownerships'
      */
-    async getDropdown(subEndpoint: string): Promise<{ value: string | number; label: string }[]> {
+    async getDropdown(
+      subEndpoint: string,
+    ): Promise<{ value: string | number; label: string }[]> {
       try {
-        const res = await apiClient.get<ApiResponse<{ value: string | number; label: string }[]>>(
-          `${endpoint}/${subEndpoint}`,
-        );
+        const res = await apiClient.get<
+          ApiResponse<{ value: string | number; label: string }[]>
+        >(`${endpoint}/${subEndpoint}`);
         return handleResponse(res.data);
       } catch (error: any) {
-        handleError(error, { showToast: true, showDetails: true, duration: 5000 });
+        handleError(error, {
+          showToast: true,
+          showDetails: true,
+          duration: 5000,
+        });
         throw error;
       }
     },
@@ -282,12 +368,21 @@ export function createBaseService<T, C, U>(endpoint: string) {
      * @param items Array of {id, order} pairs
      * @returns void
      */
-    async reorder(items: { id: number | string; order: number }[]): Promise<void> {
+    async reorder(
+      items: { id: number | string; order: number }[],
+    ): Promise<void> {
       try {
-        const res = await apiClient.post<ApiResponse<void>>(`${endpoint}/reorder`, { items });
+        const res = await apiClient.post<ApiResponse<void>>(
+          `${endpoint}/reorder`,
+          { items },
+        );
         handleResponse(res.data, false, false, { showToast: true });
       } catch (error: any) {
-        handleError(error, { showToast: true, showDetails: true, duration: 5000 });
+        handleError(error, {
+          showToast: true,
+          showDetails: true,
+          duration: 5000,
+        });
         throw error;
       }
     },

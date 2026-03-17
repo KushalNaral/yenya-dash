@@ -1,35 +1,70 @@
 <script setup lang="ts">
-defineProps<{
-  modelValue: boolean;
-  deletableTitle?: string;
-  deletableDescription?: string;
-  mode: string;
-  deleteTitle?: string;
-}>();
+import { computed } from "vue";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
+const props = withDefaults(
+  defineProps<{
+    modelValue?: boolean;
+    open?: boolean;
+    deletableTitle?: string;
+    deletableDescription?: string;
+    mode?: string;
+    deleteTitle?: string;
+  }>(),
+  { mode: "delete" },
+);
 
 const emit = defineEmits<{
   (e: "update:modelValue", val: boolean): void;
+  (e: "update:open", val: boolean): void;
   (e: "confirm"): void;
   (e: "cancel"): void;
 }>();
 
+const isOpen = computed(() => props.modelValue ?? props.open ?? false);
+
+function setOpen(val: boolean) {
+  emit("update:modelValue", val);
+  emit("update:open", val);
+}
+
+const titlePrefix = computed(() => {
+  const mode = props.mode ?? "delete";
+  return mode.charAt(0).toUpperCase() + mode.slice(1);
+});
+
+const confirmLabel = computed(() => {
+  if (props.deleteTitle) return props.deleteTitle;
+  const mode = props.mode ?? "delete";
+  return mode.charAt(0).toUpperCase() + mode.slice(1);
+});
+
 function close() {
-  emit("update:modelValue", false);
+  setOpen(false);
   emit("cancel");
 }
 
 function confirm() {
   emit("confirm");
-  emit("update:modelValue", false);
+  setOpen(false);
 }
 </script>
 
 <template>
-  <AlertDialog :open="modelValue" @update:open="(val) => emit('update:modelValue', val)">
+  <AlertDialog :open="isOpen" @update:open="setOpen">
     <AlertDialogContent>
       <AlertDialogHeader>
         <AlertDialogTitle
-          >{{ mode === "delete" ? "Delete" : "" }} "{{
+          >{{ titlePrefix }} "{{
             deletableTitle ?? "entity"
           }}"</AlertDialogTitle
         >
@@ -41,7 +76,9 @@ function confirm() {
         </AlertDialogDescription>
       </AlertDialogHeader>
       <AlertDialogFooter>
-        <AlertDialogCancel class="cursor-pointer" @click="close"> Cancel </AlertDialogCancel>
+        <AlertDialogCancel class="cursor-pointer" @click="close">
+          Cancel
+        </AlertDialogCancel>
         <AlertDialogAction
           :class="
             mode === 'delete'
@@ -50,7 +87,7 @@ function confirm() {
           "
           @click="confirm"
         >
-          {{ mode === "delete" ? "Delete" : deleteTitle }}
+          {{ confirmLabel }}
         </AlertDialogAction>
       </AlertDialogFooter>
     </AlertDialogContent>

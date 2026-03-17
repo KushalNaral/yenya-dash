@@ -70,7 +70,8 @@ function normalizeDates(data: any): any {
     for (const [key, value] of Object.entries(data)) {
       if (
         typeof value === "string" &&
-        (value.includes("T") || (/^\d{4}-\d{2}-\d{2}/.exec(value) && value.includes(" ")))
+        (value.includes("T") ||
+          (/^\d{4}-\d{2}-\d{2}/.exec(value) && value.includes(" ")))
       ) {
         try {
           const date = new Date(value);
@@ -146,6 +147,120 @@ function calculateAgeOfChild(
   };
 }
 
+/**
+ * Convert a string to a slug
+ * @param str The string to convert
+ * @returns The slug
+ */
+function slugify(str: string) {
+  return str.toLowerCase().replace(/\s+/g, "-");
+}
+/**
+ * Format a date to a string
+ * @param date The date to format
+ * @returns The formatted date string in YYYY-MM-DD format
+ */
+
+function formatDate(date: Date | null) {
+  if (!date) return null;
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+/**
+ * Convert a Date or date-like string to a MySQL-compatible
+ * DATETIME string "YYYY-MM-DD HH:MM:SS".
+ */
+function formatDateTimeToMySQL(
+  value?: string | Date | null,
+): string | undefined {
+  if (!value) return undefined;
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return undefined;
+
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  const year = date.getFullYear();
+  const month = pad(date.getMonth() + 1);
+  const day = pad(date.getDate());
+  const hours = pad(date.getHours());
+  const minutes = pad(date.getMinutes());
+  const seconds = pad(date.getSeconds());
+
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}
+/**
+ * Creates a deep copy of an object or array.
+ * Preserves File objects and Date objects.
+ */
+function deepClone<T>(obj: T): T {
+  if (obj === null || typeof obj !== "object") {
+    return obj;
+  }
+
+  if (obj instanceof File) {
+    return obj;
+  }
+
+  if (obj instanceof Date) {
+    return new Date(obj.getTime()) as any;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map((item) => deepClone(item)) as any;
+  }
+
+  const clonedObj: any = {};
+  for (const key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      clonedObj[key] = deepClone((obj as any)[key]);
+    }
+  }
+
+  return clonedObj as T;
+}
+
+function isPlainObject(v: any): v is Record<string, any> {
+  return Object.prototype.toString.call(v) === "[object Object]";
+}
+
+/**
+ * Recursively walk an object/array and convert any property named "status"
+ * that is truthy (non-zero, non-empty string, etc.) into the number 1,
+ * and falsy values into 0.
+ *
+ * Preserves null/undefined and non-plain objects (File, Date, etc.).
+ */
+function normalizeStatuses<T>(value: T): T {
+  // primitives
+  if (value === null || typeof value !== "object") return value;
+
+  // arrays -> normalize each element
+  if (Array.isArray(value)) {
+    return value.map((el) => normalizeStatuses(el)) as unknown as T;
+  }
+
+  // non-plain objects (File, Date, etc.) -> don't walk inside
+  if (!isPlainObject(value)) {
+    return value;
+  }
+
+  // plain object -> walk keys
+  const out: Record<string, any> = {};
+  for (const [k, v] of Object.entries(value as Record<string, any>)) {
+    if (k === "status" || k === "show_on_homepage") {
+      // preserve null/undefined; if number already keep it; otherwise coerce to 0/1
+      if (v === null || v === undefined) out[k] = null;
+      else if (typeof v === "number") out[k] = v;
+      else out[k] = Number(!!v);
+    } else {
+      out[k] = normalizeStatuses(v);
+    }
+  }
+  return out as T;
+}
+
 export {
   clearForm,
   toCalendarDate,
@@ -154,4 +269,9 @@ export {
   normalizeDates,
   normalizeDate,
   calculateAgeOfChild,
+  slugify,
+  formatDate,
+  formatDateTimeToMySQL,
+  deepClone,
+  normalizeStatuses,
 };

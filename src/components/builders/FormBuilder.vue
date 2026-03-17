@@ -6,6 +6,9 @@ import { toCalendarDate, fromCalendarDate, cn } from "@/lib/utils";
 import { CalendarDate } from "@internationalized/date";
 import type { HTMLAttributes } from "vue";
 import type { FormConfig, FormField, ShowIfCondition } from "@/types/form";
+import { deepClone } from "@/helpers/essentials";
+import { CalendarDateTime } from "@internationalized/date";
+import Editor from "@/components/custom/Editor.vue";
 
 const props = defineProps({
   config: {
@@ -37,7 +40,10 @@ const props = defineProps({
 const emit = defineEmits(["form-submit", "update", "reset"]);
 
 // Initialize formData from initialValues, but preserve it across config changes
-const formData = ref<Record<string, any>>({ ...props.config.initialValues });
+// Initialize formData from initialValues using deepClone
+const formData = ref<Record<string, any>>(
+  deepClone(props.config.initialValues ?? {}),
+);
 const errors = ref<Record<string, string[]>>({});
 const touched = ref<Record<string, boolean>>({});
 
@@ -79,6 +85,43 @@ const getMaxDate = (field: FormField) => {
     }
   }
   return undefined;
+};
+
+const toCalendarDateTime = (date: Date) => {
+  return new CalendarDateTime(
+    date.getFullYear(),
+    date.getMonth() + 1,
+    date.getDate(),
+    date.getHours(),
+    date.getMinutes(),
+    date.getSeconds(),
+    date.getMilliseconds(),
+  );
+};
+
+const getTimeFromDate = (name: string) => {
+  const date = formData.value[name];
+  if (!(date instanceof Date)) return "00:00:00";
+
+  const h = String(date.getHours()).padStart(2, "0");
+  const m = String(date.getMinutes()).padStart(2, "0");
+  const s = String(date.getSeconds()).padStart(2, "0");
+
+  return `${h}:${m}:${s}`;
+};
+const setTimeForField = (name: string, time: string) => {
+  const date = formData.value[name];
+
+  if (!(date instanceof Date)) return;
+
+  const [hours, minutes, seconds] = time.split(":").map(Number);
+
+  date.setHours(hours);
+  date.setMinutes(minutes);
+  date.setSeconds(seconds ?? 0);
+  // Important: trigger reactivity
+  formData.value[name] = fromCalendarDate(toCalendarDateTime(date));
+  console.log(formData.value[name]);
 };
 
 const filePreviews = ref<
@@ -133,11 +176,11 @@ watch(
           formData.value[key] === null ||
           formData.value[key] === ""
         ) {
-          formData.value[key] = newVal[key];
+          formData.value[key] = deepClone(newVal[key]);
         }
       });
     } else if (currentNonEmptyCount === 0 && newNonEmptyCount > 0) {
-      formData.value = { ...newVal };
+      formData.value = deepClone(newVal);
     }
   },
   { deep: true, immediate: false },
@@ -193,7 +236,10 @@ const validateField = (field: FormField, value: any): string => {
   ) {
     return `${field.label} is required`;
   }
-  if (["text", "email", "password", "textarea"].includes(field.type) && value) {
+  if (
+    ["text", "email", "password", "textarea", "editor"].includes(field.type) &&
+    value
+  ) {
     if (field.type === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
       return "Invalid email format";
     }
@@ -274,7 +320,7 @@ const validateForm = (): boolean => {
   props.config.fields.forEach((field) => {
     const error = validateField(field, formData.value[field.name]);
     if (error) {
-      errors.value[field.name] = error;
+      errors.value[field.name] = Array.isArray(error) ? error : [error];
       isValid = false;
     }
   });
@@ -405,11 +451,10 @@ const clearFieldData = (fieldName: string, fieldConfig?: FormField) => {
 
   // Determine the appropriate reset value based on field type
   if (fieldConfig) {
-    if (
-      fieldConfig.type === "multiple-file" ||
-      fieldConfig.type === "tree-select"
-    ) {
+    if (fieldConfig.type === "multiple-file") {
       resetTo = [];
+    } else if (fieldConfig.type === "tree-select") {
+      resetTo = null;
     } else if (
       fieldConfig.type === "checkbox" ||
       fieldConfig.type === "switch"
@@ -513,8 +558,10 @@ watch(
 
         // Determine reset value by field type
         let resetTo: any = null;
-        if (field.type === "multiple-file" || field.type === "tree-select") {
+        if (field.type === "multiple-file") {
           resetTo = [];
+        } else if (field.type === "tree-select") {
+          resetTo = null;
         } else if (field.type === "checkbox" || field.type === "switch") {
           resetTo = false;
         } else {
@@ -552,6 +599,23 @@ watch(
   { deep: true, immediate: false },
 );
 
+/**
+ * Watches for changes to formData and updates fields with computedValue.
+ */
+watch(
+  () => formData.value,
+  (newVal) => {
+    props.config.fields.forEach((field) => {
+      if (field.computedValue) {
+        const computedVal = field.computedValue(newVal);
+        if (formData.value[field.name] !== computedVal) {
+          formData.value[field.name] = computedVal;
+        }
+      }
+    });
+  },
+  { deep: true },
+);
 const updateFilePreviews = (
   field: FormField,
   files: File | File[] | string | any | null,
@@ -607,24 +671,6 @@ const updateFilePreviews = (
   });
 };
 
-/**
- * Watches for changes to formData and updates fields with computedValue.
- */
-watch(
-  () => formData.value,
-  (newVal) => {
-    props.config.fields.forEach((field) => {
-      if (field.computedValue) {
-        const computedVal = field.computedValue(newVal);
-        if (formData.value[field.name] !== computedVal) {
-          formData.value[field.name] = computedVal;
-        }
-      }
-    });
-  },
-  { deep: true },
-);
-
 // Initialize file previews from initial formData
 watch(
   () => formData.value,
@@ -668,7 +714,8 @@ const handleInput = (field: FormField, value: any) => {
   formData.value[field.name] = value;
   touched.value[field.name] = true;
   hasUserData.value = true;
-  errors.value[field.name] = validateField(field, value);
+  const err = validateField(field, value);
+  errors.value[field.name] = err ? (Array.isArray(err) ? err : [err]) : [];
   if (["file", "multiple-file"].includes(field.type)) {
     // If it's a new file upload, it will be handled by updateFilePreviews which is called from @change
     // handleInput is called with the value, so we can check if it's already a File or just a URL
@@ -680,7 +727,8 @@ const handleInput = (field: FormField, value: any) => {
 
 const handleBlur = (field: FormField) => {
   touched.value[field.name] = true;
-  errors.value[field.name] = validateField(field, formData.value[field.name]);
+  const err = validateField(field, formData.value[field.name]);
+  errors.value[field.name] = err ? (Array.isArray(err) ? err : [err]) : [];
 };
 
 // const handleReset = () => {
@@ -847,6 +895,7 @@ onUnmounted(() => {
         @submit.prevent="handleSubmit"
         :class="getFieldClasses"
         :aria-label="props.config.title || 'Dynamic Form'"
+        novalidate
       >
         <template
           v-for="(group, groupIndex) in groupedFields"
@@ -1008,12 +1057,12 @@ onUnmounted(() => {
                 <MultiSelect
                   v-model="formData[field.name]"
                   :options="field.options || []"
-                  :multiple="true"
+                  :multiple="field.type === 'multi-select'"
                   :searchable="true"
                   :placeholder="field.placeholder || 'Select options...'"
                   :disabled="field.disabled"
                   :clearable="!field.required"
-                  :disable-branch-nodes="field.type === 'tree-select'"
+                  :disable-branch-nodes="field.disableBranchNodes ?? false"
                   @update:modelValue="handleInput(field, $event)"
                   @blur="handleBlur(field)"
                   class="w-full px-4 py-2.5 rounded-lg border text-foreground placeholder:text-muted-foreground/50 transition-all duration-200 ease-out hover:border-form-field-hover focus:outline-none focus:ring-2 focus:ring-form-field-focus/20 focus:border-form-field-focus min-h-[46px]"
@@ -1159,66 +1208,89 @@ onUnmounted(() => {
               </template>
 
               <template v-else-if="field.type === 'date'">
-                <Popover
-                  :name="field.name"
-                  v-model:open="popoverOpen[field.name]"
-                >
-                  <PopoverTrigger as-child>
-                    <Button
-                      variant="outline"
-                      :name="field.name"
-                      :class="
-                        cn(
-                          'form-field w-full px-4 py-2.5 rounded-lg text-left flex items-center min-h-[46px]',
-                          !formData[field.name] && 'text-muted-foreground',
-                          (touched[field.name] ||
-                            (props.externalErrors &&
-                              props.externalErrors[field.name])) &&
-                            allErrors[field.name] &&
-                            'border-destructive/40 hover:border-destructive/50 focus:ring-destructive/20 focus:border-destructive',
-                          field.disabled && 'opacity-50 cursor-not-allowed',
-                        )
-                      "
-                      :disabled="!!field.disabled"
-                      :aria-label="field.label"
-                      v-bind="field.attributes"
-                    >
-                      <span class="text-left flex-1">{{
-                        formData[field.name]
-                          ? formatDate(formData[field.name])
-                          : "Pick a date"
-                      }}</span>
-                      <Iconify
-                        icon="mdi-calendar"
-                        class="size-4 text-muted-foreground"
-                      />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent
+                <div class="flex gap-4 overflow-hidden">
+                  <Popover
                     :name="field.name"
-                    class="w-auto p-0 bg-background border border-input shadow-sm rounded-md"
+                    v-model:open="popoverOpen[field.name]"
                   >
-                    <Calendar
-                      :key="field.dateLayout"
-                      :model-value="getCalendarDateValue(field.name)"
-                      :default-placeholder="
-                        toCalendarDate(field?.placeholder || 'Pick a date')
-                      "
-                      @update:modelValue="
-                        (value) => {
-                          setDateFromCalendar(field.name, value);
-                          handleInput(field, formData[field.name]);
-                          popoverOpen[field.name] = false;
-                        }
-                      "
-                      :layout="field.dateLayout || 'month-and-year'"
-                      initial-focus
-                      :disabled="!!field.disabled"
-                      :min-value="getMinDate(field)"
-                      :max-value="getMaxDate(field)"
-                    />
-                  </PopoverContent>
-                </Popover>
+                    <PopoverTrigger as-child>
+                      <Button
+                        variant="outline"
+                        :name="field.name"
+                        :class="
+                          cn(
+                            'form-field w-full px-4 py-2.5 rounded-lg text-left flex items-center min-h-[46px]',
+                            field.includeTime && 'w-75',
+                            !formData[field.name] && 'text-muted-foreground',
+                            (touched[field.name] ||
+                              (props.externalErrors &&
+                                props.externalErrors[field.name])) &&
+                              allErrors[field.name] &&
+                              'border-destructive/40 hover:border-destructive/50 focus:ring-destructive/20 focus:border-destructive',
+                            field.disabled && 'opacity-50 cursor-not-allowed',
+                          )
+                        "
+                        :disabled="!!field.disabled"
+                        :aria-label="field.label"
+                        v-bind="field.attributes"
+                      >
+                        <span class="text-left flex-1">{{
+                          formData[field.name]
+                            ? formatDate(formData[field.name])
+                            : "Pick a date"
+                        }}</span>
+                        <Iconify
+                          icon="mdi-calendar"
+                          class="size-4 text-muted-foreground"
+                        />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      :name="field.name"
+                      class="w-auto p-0 bg-background border border-input shadow-sm rounded-md"
+                    >
+                      <Calendar
+                        :key="field.dateLayout"
+                        :model-value="getCalendarDateValue(field.name)"
+                        :default-placeholder="
+                          toCalendarDate(field?.placeholder || 'Pick a date')
+                        "
+                        @update:modelValue="
+                          (value) => {
+                            setDateFromCalendar(field.name, value);
+                            handleInput(field, formData[field.name]);
+                            popoverOpen[field.name] = false;
+                          }
+                        "
+                        :layout="field.dateLayout || 'month-and-year'"
+                        initial-focus
+                        :disabled="!!field.disabled"
+                        :min-value="getMinDate(field)"
+                        :max-value="getMaxDate(field)"
+                      />
+                    </PopoverContent>
+                  </Popover>
+
+                  <template v-if="field.type === 'date' && field.includeTime">
+                    <div class="flex flex-col gap-3">
+                      <!-- :value="formData[field.name]"
+                      @update:modelValue="handleInput(field, $event)" -->
+                      <Input
+                        id="time-picker"
+                        type="time"
+                        step="1"
+                        class="form-field w-full px-4 py-2.5 rounded-lg [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
+                        :model-value="getTimeFromDate(field.name)"
+                        @update:model-value="
+                          (time) => {
+                            setTimeForField(field.name, time as string);
+                            handleInput(field, formData[field.name]);
+                          }
+                        "
+                      />
+                    </div>
+                  </template>
+                </div>
               </template>
 
               <template v-else-if="field.type === 'checkbox'">
@@ -1293,6 +1365,22 @@ onUnmounted(() => {
                       : 'false'
                   "
                   :aria-describedby="`${field.name}-error`"
+                />
+              </template>
+
+              <template v-else-if="field.type === 'editor'">
+                <Editor
+                  :model-value="formData[field.name]"
+                  :placeholder="field.placeholder"
+                  :disabled="!!field.disabled"
+                  :max-length="field.maxLength"
+                  @update:modelValue="
+                    (val: any) => {
+                      formData[field.name] = val;
+                      handleInput(field, val);
+                    }
+                  "
+                  @blur="handleBlur(field)"
                 />
               </template>
 
@@ -1431,6 +1519,7 @@ onUnmounted(() => {
                       'email',
                       'password',
                       'textarea',
+                      'editor',
                     ].includes(field.type)
                   "
                   class="text-sm text-foreground"

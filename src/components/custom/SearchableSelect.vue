@@ -69,10 +69,17 @@ const selectedOption = computed({
             </template>
 
             <ComboboxGroup>
-              <ComboboxItem v-for="opt in options" :key="opt.value" :value="opt">
+              <ComboboxItem
+                v-for="opt in options"
+                :key="opt.value"
+                :value="opt"
+              >
                 {{ opt.label }}
                 <ComboboxItemIndicator>
-                  <Iconify icon="mdi-check" class="size-4 text-muted-foreground" />
+                  <Iconify
+                    icon="mdi-check"
+                    class="size-4 text-muted-foreground"
+                  />
                 </ComboboxItemIndicator>
               </ComboboxItem>
             </ComboboxGroup>

@@ -1,6 +1,11 @@
 <script setup lang="ts">
-import { ref, computed, PropType } from "vue";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ref, computed } from "vue";
+import type { PropType } from "vue";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -58,7 +63,14 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(["update:modelValue", "select", "remove", "change", "clear", "search"]);
+const emit = defineEmits([
+  "update:modelValue",
+  "select",
+  "remove",
+  "change",
+  "clear",
+  "search",
+]);
 
 const open = ref(false);
 const searchQuery = ref("");
@@ -120,16 +132,25 @@ function getLabel(value: any): string {
 }
 
 function isSelected(value: any): boolean {
-  return props.multiple ? internalValue.value.includes(value) : internalValue.value === value;
+  return props.multiple
+    ? internalValue.value.includes(value)
+    : internalValue.value === value;
 }
 
 function toggleSelect(opt: Option) {
-  if (props.disabled || opt.disabled || (props.disableBranchNodes && opt.children?.length)) return;
+  if (
+    props.disabled ||
+    opt.disabled ||
+    (props.disableBranchNodes && opt.children?.length)
+  )
+    return;
 
   if (props.multiple) {
     const index = internalValue.value.indexOf(opt.value);
     if (index > -1) {
-      internalValue.value = internalValue.value.filter((v: any) => v !== opt.value);
+      internalValue.value = internalValue.value.filter(
+        (v: any) => v !== opt.value,
+      );
       emit("remove", opt);
     } else if (internalValue.value.length < props.max) {
       internalValue.value = [...internalValue.value, opt.value];
@@ -182,7 +203,11 @@ function toggleExpand(value: any) {
       >
         <div class="flex-1 flex items-center gap-2 min-w-0">
           <div class="flex gap-1 items-center min-w-0 flex-1">
-            <template v-if="multiple && internalValue?.length && internalValue.length < 2">
+            <template
+              v-if="
+                multiple && internalValue?.length && internalValue.length < 2
+              "
+            >
               <Badge
                 v-for="val in internalValue"
                 :key="val"
@@ -201,7 +226,9 @@ function toggleExpand(value: any) {
                 variant="secondary"
                 class="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-primary/10 text-primary border-primary/20 hover:bg-primary/15 transition-colors duration-150"
               >
-                <span class="truncate max-w-[200px]">{{ getLabel(internalValue[0]) }}</span>
+                <span class="truncate max-w-[200px]">{{
+                  getLabel(internalValue[0])
+                }}</span>
                 <X
                   class="h-3 w-3 cursor-pointer hover:text-destructive transition-colors duration-150"
                   @click.stop="remove(internalValue[0])"
@@ -211,7 +238,9 @@ function toggleExpand(value: any) {
                 variant="secondary"
                 class="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-primary/10 text-primary border-primary/20 hover:bg-primary/15 transition-colors duration-150"
               >
-                <span class="truncate max-w-[200px]">+{{ internalValue.length - 1 }} more</span>
+                <span class="truncate max-w-[200px]"
+                  >+{{ internalValue.length - 1 }} more</span
+                >
               </Badge>
             </template>
             <span
@@ -228,7 +257,11 @@ function toggleExpand(value: any) {
 
         <div class="flex items-center gap-1 ml-2 flex-shrink-0">
           <button
-            v-if="clearable && internalValue && (multiple ? internalValue.length > 0 : true)"
+            v-if="
+              clearable &&
+              internalValue &&
+              (multiple ? internalValue.length > 0 : true)
+            "
             type="button"
             class="p-1 rounded-sm hover:bg-muted transition-colors duration-150 opacity-60 hover:opacity-100"
             @click.stop="clear"
@@ -244,9 +277,9 @@ function toggleExpand(value: any) {
     </PopoverTrigger>
 
     <PopoverContent
-      class="z-[100] w-[var(--radix-popover-trigger-width)] p-0 shadow-lg border-border/40"
+      class="z-[100] w-[var(--radix-popover-trigger-width)] p-0 shadow-lg border-border/40 max-h-[min(360px,80vh)] overflow-hidden flex flex-col"
     >
-      <div v-if="searchable" class="relative">
+      <div v-if="searchable" class="relative flex-shrink-0">
         <Search
           class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground"
         />
@@ -257,15 +290,21 @@ function toggleExpand(value: any) {
         />
       </div>
 
-      <ScrollArea class="w-full py-2 bg-white max-h-[300px]">
+      <ScrollArea
+        class="h-[300px] w-full overflow-hidden py-2 bg-white shrink-0"
+      >
         <div
           v-if="!filteredOptions.length"
           class="flex flex-col items-center justify-center py-8 px-4"
         >
-          <div class="w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center mb-3">
+          <div
+            class="w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center mb-3"
+          >
             <Search class="h-5 w-5 text-muted-foreground" />
           </div>
-          <p class="text-sm text-muted-foreground text-center">No options found</p>
+          <p class="text-sm text-muted-foreground text-center">
+            No options found
+          </p>
           <p class="text-xs text-muted-foreground/70 text-center mt-1">
             Try adjusting your search terms
           </p>

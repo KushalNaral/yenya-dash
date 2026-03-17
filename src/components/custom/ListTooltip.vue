@@ -18,13 +18,19 @@
           <div v-else>
             <div v-if="title" class="font-semibold mb-1">{{ title }}</div>
             <ul class="list-disc list-inside space-y-1">
-              <li v-for="(item, index) in items" :key="getItemKey(item, index)" :class="itemClass">
+              <li
+                v-for="(item, index) in items"
+                :key="getItemKey(item, index)"
+                :class="itemClass"
+              >
                 <slot name="item" :item="item" :index="index">
                   {{ formatItem(item) }}
                 </slot>
               </li>
             </ul>
-            <div v-if="footerMessage" class="text-xs text-white/80 mt-2">{{ footerMessage }}</div>
+            <div v-if="footerMessage" class="text-xs text-white/80 mt-2">
+              {{ footerMessage }}
+            </div>
           </div>
         </template>
       </TooltipContent>

@@ -1,7 +1,12 @@
 <script setup lang="ts">
-import type { ActionDisplayMode, DataTableAction, DataTableColumn } from "@/types/datatable";
+import type {
+  ActionDisplayMode,
+  DataTableAction,
+  DataTableColumn,
+} from "@/types/datatable";
 import { computed, useSlots } from "vue";
 
+defineSlots<{ [key: string]: (props: Record<string, unknown>) => any }>();
 const slots = useSlots();
 
 import DataTableDataRow from "./DataTableDataRow.vue";
@@ -45,10 +50,19 @@ const props = withDefaults(
   },
 );
 
-const emit = defineEmits(["row-click", "row-double-click", "toggle-row", "handle-action"]);
+const emit = defineEmits([
+  "row-click",
+  "row-double-click",
+  "toggle-row",
+  "handle-action",
+]);
 
-const isExpanded = computed(() => props.expandedRows.has(props.row.id?.toString()));
-const hasChildren = computed(() => props.row.children && props.row.children.length > 0);
+const isExpanded = computed(() =>
+  props.expandedRows.has(props.row.id?.toString()),
+);
+const hasChildren = computed(
+  () => props.row.children && props.row.children.length > 0,
+);
 </script>
 
 <template>
@@ -61,7 +75,11 @@ const hasChildren = computed(() => props.row.children && props.row.children.leng
     @toggle-row="emit('toggle-row', $event)"
     @handle-action="emit('handle-action', $event)"
   >
-    <template v-for="(_, slotName) in slots" :key="slotName" #[slotName]="slotProps">
+    <template
+      v-for="(_, slotName) in slots"
+      :key="slotName"
+      #[slotName]="slotProps"
+    >
       <slot :name="slotName" v-bind="slotProps" />
     </template>
   </DataTableDataRow>
@@ -86,12 +104,20 @@ const hasChildren = computed(() => props.row.children && props.row.children.leng
     :current-page="currentPage"
     :per-page="perPage"
     :expanded-rows="expandedRows"
-    @row-click="emit('row-click', $event, rowIndex + (childIndex as number) + 1)"
-    @row-double-click="emit('row-double-click', $event, rowIndex + (childIndex as number) + 1)"
+    @row-click="
+      emit('row-click', $event, rowIndex + (childIndex as number) + 1)
+    "
+    @row-double-click="
+      emit('row-double-click', $event, rowIndex + (childIndex as number) + 1)
+    "
     @toggle-row="emit('toggle-row', $event)"
     @handle-action="emit('handle-action', $event)"
   >
-    <template v-for="(_, slotName) in slots" :key="slotName" #[slotName]="slotProps">
+    <template
+      v-for="(_, slotName) in slots"
+      :key="slotName"
+      #[slotName]="slotProps"
+    >
       <slot :name="slotName" v-bind="slotProps" />
     </template>
   </RowRenderer>

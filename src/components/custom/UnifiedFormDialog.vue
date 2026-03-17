@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, type HtmlHTMLAttributes } from "vue";
 import FormBuilder from "@/components/builders/FormBuilder.vue";
 import type { FormConfig } from "@/types/form";
+import { cn } from "@/lib/utils";
 
 interface Props {
   open: boolean;
-  mode?: "create" | "edit" | "upload";
+  mode?: "create" | "edit" | "upload" | "view";
   title?: string;
   description?: string;
   formConfig: FormConfig;
@@ -13,6 +14,7 @@ interface Props {
   loading?: boolean;
   formId?: string;
   serverErrors?: Record<string, string[]>;
+  class?: HtmlHTMLAttributes["class"];
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -20,6 +22,7 @@ const props = withDefaults(defineProps<Props>(), {
   loading: false,
   formId: "dynamic-form",
   serverErrors: () => ({}) as Record<string, string[]>,
+  class: () => "",
 });
 
 const emit = defineEmits<{
@@ -31,7 +34,10 @@ const emit = defineEmits<{
 
 const mergedFormConfig = computed(() => {
   const config = { ...props.formConfig };
-  if (props.editData && (!config.initialValues || Object.keys(config.initialValues).length === 0)) {
+  if (
+    props.editData &&
+    (!config.initialValues || Object.keys(config.initialValues).length === 0)
+  ) {
     config.initialValues = props.editData;
   }
   return config;
@@ -72,7 +78,12 @@ const handleReset = () => {};
 <template>
   <Dialog :open="props.open" @update:open="handleClose">
     <DialogContent
-      class="sm:max-w-5xl max-w-[calc(100%-2rem)] rounded-xl p-0 bg-background backdrop-blur-md border border-border/40 shadow-2xl flex flex-col overflow-hidden transition-all duration-300 animate-in fade-in slide-in-from-bottom-4"
+      :class="
+        cn(
+          'sm:max-w-5xl max-w-[calc(100%-2rem)] rounded-xl p-0 bg-background backdrop-blur-md border border-border/40 shadow-2xl flex flex-col overflow-hidden transition-all duration-300 animate-in fade-in slide-in-from-bottom-4',
+          props.class,
+        )
+      "
       style="max-height: 85vh"
     >
       <DialogHeader
@@ -93,7 +104,11 @@ const handleReset = () => {};
           <FormBuilder
             v-if="props.open"
             :config="mergedFormConfig"
-            :mode="props.mode === 'create' || props.mode === 'upload' ? 'edit' : props.mode"
+            :mode="
+              props.mode === 'create' || props.mode === 'upload'
+                ? 'edit'
+                : props.mode
+            "
             :loading="props.loading"
             :formId="props.formId"
             :external-errors="props.serverErrors"

@@ -1,7 +1,9 @@
 <template>
   <div class="space-y-6" :class="containerClassName">
     <!-- Header with title, help, and controls -->
-    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div
+      class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+    >
       <div class="flex items-center gap-3">
         <h2 class="text-2xl font-bold text-primary tracking-tight">
           {{ dataType.charAt(0).toUpperCase() + dataType.slice(1) }} Management
@@ -32,7 +34,7 @@
               : 'hover:bg-primary hover:text-white'
           "
           @click="toggleDragMode"
-          :disabled="isLoading || isReordering"
+          :disabled="isLoading"
           :title="isDragModeActive ? 'Disable Ordering' : 'Enable Ordering'"
         >
           <Iconify
@@ -49,15 +51,24 @@
           :disabled="isLoading"
           title="Refresh"
         >
-          <Iconify icon="lucide:refresh-cw" class="size-4" :class="{ 'animate-spin': isLoading }" />
+          <Iconify
+            icon="lucide:refresh-cw"
+            class="size-4"
+            :class="{ 'animate-spin': isLoading }"
+          />
         </Button>
         <slot name="headerActions" />
       </div>
     </div>
 
     <!-- Filters and Search -->
-    <div class="bg-card rounded-lg p-4 shadow-sm border" :class="filterContainerClassName">
-      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+    <div
+      class="bg-card rounded-lg p-4 shadow-sm border"
+      :class="filterContainerClassName"
+    >
+      <div
+        class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
+      >
         <div class="relative w-full md:w-auto md:min-w-[300px]">
           <Iconify
             icon="lucide:search"
@@ -92,15 +103,25 @@
                 </Badge>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent class="w-[300px] p-4" :class="filterDropdownClassName">
+            <DropdownMenuContent
+              class="w-[300px] p-4"
+              :class="filterDropdownClassName"
+            >
               <div class="space-y-4">
-                <div v-for="filter in filtersConfig" :key="filter.key" class="space-y-2">
+                <div
+                  v-for="filter in filtersConfig"
+                  :key="filter.key"
+                  class="space-y-2"
+                >
                   <Label class="font-medium flex items-center gap-2">
                     {{ filter.label }}
                     <TooltipProvider v-if="filter.tooltip">
                       <Tooltip>
                         <TooltipTrigger>
-                          <Iconify icon="lucide:help-circle" class="size-4 text-muted-foreground" />
+                          <Iconify
+                            icon="lucide:help-circle"
+                            class="size-4 text-muted-foreground"
+                          />
                         </TooltipTrigger>
                         <TooltipContent>
                           {{ filter.tooltip }}
@@ -118,10 +139,16 @@
                     :class="filter.className"
                   >
                     <SelectTrigger class="w-full">
-                      <SelectValue :placeholder="filter.placeholder || `Select ${filter.label}`" />
+                      <SelectValue
+                        :placeholder="
+                          filter.placeholder || `Select ${filter.label}`
+                        "
+                      />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem :value="null">All {{ filter.label }}</SelectItem>
+                      <SelectItem :value="null"
+                        >All {{ filter.label }}</SelectItem
+                      >
                       <SelectItem
                         v-for="option in filter.options"
                         :key="option.value"
@@ -144,7 +171,11 @@
                     :class="filter.className"
                   >
                     <SelectTrigger class="w-full">
-                      <SelectValue :placeholder="filter.placeholder || `Select ${filter.label}`" />
+                      <SelectValue
+                        :placeholder="
+                          filter.placeholder || `Select ${filter.label}`
+                        "
+                      />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem
@@ -160,7 +191,10 @@
                   </Select>
 
                   <!-- Date Range Filter -->
-                  <div v-else-if="filter.type === 'date-range'" class="space-y-2">
+                  <div
+                    v-else-if="filter.type === 'date-range'"
+                    class="space-y-2"
+                  >
                     <div class="flex gap-2">
                       <Input
                         type="date"
@@ -194,7 +228,9 @@
                     <Input
                       type="date"
                       v-model="filters[filter.key]"
-                      :placeholder="filter.placeholder || `Select ${filter.label}`"
+                      :placeholder="
+                        filter.placeholder || `Select ${filter.label}`
+                      "
                       class="w-full"
                       :class="filter.className"
                       @change="debouncedFetchData"
@@ -202,7 +238,10 @@
                   </div>
 
                   <!-- Number Range Filter -->
-                  <div v-else-if="filter.type === 'number-range'" class="space-y-2">
+                  <div
+                    v-else-if="filter.type === 'number-range'"
+                    class="space-y-2"
+                  >
                     <div class="flex gap-2">
                       <Input
                         type="number"
@@ -245,7 +284,12 @@
                 </div>
               </div>
               <div class="flex justify-between mt-4">
-                <Button variant="outline" size="sm" class="cursor-pointer" @click="applyFilters">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  class="cursor-pointer"
+                  @click="applyFilters"
+                >
                   Apply Filters
                 </Button>
                 <Button
@@ -305,7 +349,10 @@
               <DropdownMenuCheckboxItem
                 :checked="actionDisplayMode === 'horizontal'"
                 @update:checked="
-                  actionDisplayMode = actionDisplayMode === 'horizontal' ? 'dropdown' : 'horizontal'
+                  actionDisplayMode =
+                    actionDisplayMode === 'horizontal'
+                      ? 'dropdown'
+                      : 'horizontal'
                 "
               >
                 Horizontal Buttons
@@ -334,7 +381,10 @@
         class="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-20"
       >
         <div class="flex flex-col items-center gap-2">
-          <Iconify icon="lucide:loader-circle" class="size-8 animate-spin text-primary" />
+          <Iconify
+            icon="lucide:loader-circle"
+            class="size-8 animate-spin text-primary"
+          />
           <p class="text-sm text-muted-foreground">Loading {{ dataType }}...</p>
         </div>
       </div>
@@ -344,10 +394,15 @@
         v-if="!isLoading && displayData.length === 0 && !showTableWhenEmpty"
         class="flex flex-col items-center justify-center py-16 gap-4"
       >
-        <Iconify icon="lucide:folder-search" class="size-12 text-muted-foreground" />
+        <Iconify
+          icon="lucide:folder-search"
+          class="size-12 text-muted-foreground"
+        />
         <div class="text-center">
           <h3 class="text-lg font-medium">No {{ dataType }} found</h3>
-          <p class="text-sm text-muted-foreground">Try adjusting your search or filters</p>
+          <p class="text-sm text-muted-foreground">
+            Try adjusting your search or filters
+          </p>
         </div>
         <Button
           variant="outline"
@@ -359,24 +414,39 @@
       </div>
 
       <!-- Table -->
-      <div v-if="displayData.length > 0 || showTableWhenEmpty" class="overflow-x-auto">
-        <Table :class="cn(tableClassName, 'text-left whitespace-nowrap')">
+      <div
+        v-if="displayData.length > 0 || showTableWhenEmpty"
+        class="overflow-x-auto"
+      >
+        <Table :class="cn(tableClassName, 'text-left table-fixed w-full')">
           <TableHeader class="sticky top-0 z-10 bg-background">
             <slot name="header" :visible-columns="visibleColumns">
               <TableRow>
                 <!-- Drag Handle Header -->
-                <TableHead v-if="isDragModeActive && draggableConfig?.enabled" class="w-10">
+                <TableHead
+                  v-if="isDragModeActive && draggableConfig?.enabled"
+                  class="w-10"
+                >
                   <span class="sr-only">Drag</span>
                 </TableHead>
                 <TableHead
                   v-for="column in visibleColumns"
                   :key="column.accessorKey"
                   class="font-medium text-foreground whitespace-nowrap"
-                  :class="[column.className, column.resizable ? 'resize-x' : '']"
-                  :style="{ minWidth: column.minWidth, maxWidth: column.maxWidth }"
+                  :class="[
+                    column.className,
+                    column.resizable ? 'resize-x' : '',
+                  ]"
+                  :style="{
+                    minWidth: column.minWidth,
+                    maxWidth: column.maxWidth,
+                  }"
                 >
                   <div class="flex items-start gap-4">
-                    <slot :name="`thead-${column.accessorKey}`" :column="column">
+                    <slot
+                      :name="`thead-${column.accessorKey}`"
+                      :column="column"
+                    >
                       {{ column.header }}
                     </slot>
                     <Button
@@ -390,7 +460,9 @@
                         icon="lucide:arrow-up-down"
                         class="size-3.5 transition-colors"
                         :class="
-                          sortKey === column.accessorKey ? 'text-primary' : 'text-muted-foreground'
+                          sortKey === column.accessorKey
+                            ? 'text-primary'
+                            : 'text-muted-foreground'
                         "
                       />
                     </Button>
@@ -420,8 +492,9 @@
             handle=".drag-handle"
             ghost-class="opacity-50"
             drag-class="bg-muted/80"
+            :component-data="draggableComponentData"
             :animation="200"
-            :disabled="isReordering"
+            :disabled="false"
             @end="handleDragEnd"
           >
             <template #item="{ element: row, index }">
@@ -448,7 +521,11 @@
                 @toggle-row="toggleRow"
                 @handle-action="handleAction"
               >
-                <template v-for="(_, slotName) in $slots" :key="slotName" #[slotName]="slotProps">
+                <template
+                  v-for="(_, slotName) in $slots"
+                  :key="slotName"
+                  #[slotName]="slotProps"
+                >
                   <slot :name="slotName" v-bind="slotProps" />
                 </template>
               </DataTableDataRow>
@@ -480,12 +557,20 @@
               @toggle-row="toggleRow"
               @handle-action="handleAction"
             >
-              <template v-for="(_, slotName) in $slots" :key="slotName" #[slotName]="slotProps">
+              <template
+                v-for="(_, slotName) in $slots"
+                :key="slotName"
+                #[slotName]="slotProps"
+              >
                 <slot :name="slotName" v-bind="slotProps" />
               </template>
             </RowRenderer>
 
-            <TableRow v-if="!isLoading && displayData.length === 0 && showTableWhenEmpty">
+            <TableRow
+              v-if="
+                !isLoading && displayData.length === 0 && showTableWhenEmpty
+              "
+            >
               <TableCell
                 :colspan="visibleColumns.length + (actions ? 1 : 0)"
                 class="h-24 text-center text-muted-foreground"
@@ -506,7 +591,9 @@
     >
       <div class="text-sm text-muted-foreground">
         Showing
-        <span class="font-medium text-foreground">{{ (currentPage - 1) * perPage + 1 }}</span>
+        <span class="font-medium text-foreground">{{
+          (currentPage - 1) * perPage + 1
+        }}</span>
         to
         <span class="font-medium text-foreground">{{
           Math.min(currentPage * perPage, total)
@@ -519,7 +606,10 @@
         <div class="flex items-center gap-1 text-sm">
           <span>Rows per page:</span>
           <Select v-model="perPageString">
-            <SelectTrigger class="h-8 w-[70px] cursor-pointer" :class="pageSizeSelectClassName">
+            <SelectTrigger
+              class="h-8 w-[70px] cursor-pointer"
+              :class="pageSizeSelectClassName"
+            >
               <SelectValue />
             </SelectTrigger>
             <SelectContent class="cursor-pointer">
@@ -556,7 +646,8 @@
               :class="{
                 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-white cursor-pointer':
                   currentPage === page,
-                'hover:bg-primary hover:text-white cursor-pointer': currentPage !== page,
+                'hover:bg-primary hover:text-white cursor-pointer':
+                  currentPage !== page,
               }"
               @click="changePage(page)"
             >
@@ -584,25 +675,42 @@
         <DialogHeader>
           <DialogTitle class="flex items-center gap-2">
             <Iconify icon="lucide:help-circle" class="size-5" />
-            How to use {{ dataType.charAt(0).toUpperCase() + dataType.slice(1) }} Management
+            How to use
+            {{
+              dataType.charAt(0).toUpperCase() + dataType.slice(1)
+            }}
+            Management
           </DialogTitle>
         </DialogHeader>
         <div class="space-y-4 text-sm">
           <div v-for="(section, index) in helpContent" :key="index">
             <h4 class="font-semibold text-base mb-2 flex items-center gap-2">
-              <Iconify :icon="section.icon" v-if="section.icon" class="size-4" />
+              <Iconify
+                :icon="section.icon"
+                v-if="section.icon"
+                class="size-4"
+              />
               {{ section.title }}
             </h4>
             <p class="text-muted-foreground mb-2">{{ section.description }}</p>
-            <ul v-if="section.steps" class="list-disc list-inside space-y-1 ml-4">
-              <li v-for="step in section.steps" :key="step" class="text-muted-foreground">
+            <ul
+              v-if="section.steps"
+              class="list-disc list-inside space-y-1 ml-4"
+            >
+              <li
+                v-for="step in section.steps"
+                :key="step"
+                class="text-muted-foreground"
+              >
                 {{ step }}
               </li>
             </ul>
           </div>
         </div>
         <DialogFooter>
-          <Button @click="showHelp = false" class="cursor-pointer">Got it</Button>
+          <Button @click="showHelp = false" class="cursor-pointer"
+            >Got it</Button
+          >
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -615,7 +723,9 @@
         </DialogHeader>
         <p>{{ confirmMessage }}</p>
         <DialogFooter>
-          <Button variant="outline" @click="showConfirmDialog = false">Cancel</Button>
+          <Button variant="outline" @click="showConfirmDialog = false"
+            >Cancel</Button
+          >
           <Button @click="executeConfirmedAction">Confirm</Button>
         </DialogFooter>
       </DialogContent>
@@ -652,7 +762,9 @@ const props = withDefaults(
     columns: DataTableColumn[];
     actions?: DataTableAction[];
     updateData?: (id: string, key: string, value: any) => void;
-    fetchData: (params: DataTableFetchParams) => Promise<PaginatedResponse<any> | any[]>;
+    fetchData: (
+      params: DataTableFetchParams,
+    ) => Promise<PaginatedResponse<any> | any[]>;
     usePagination?: boolean;
     filtersConfig?: DataTableFilterConfig[];
     dataKey?: string;
@@ -719,7 +831,6 @@ const emit = defineEmits<{
 
 const searchQuery = ref<string>("");
 const isDragModeActive = ref<boolean>(false);
-const isReordering = ref<boolean>(false);
 const sortKey = ref<string>("");
 const sortOrder = ref<"asc" | "desc">("asc");
 const currentPage = ref<number>(1);
@@ -761,7 +872,9 @@ const activeFilterCount = computed(() => {
     if (value === null || value === undefined || value === "") return count;
     if (Array.isArray(value)) return value.length > 0 ? count + 1 : count;
     if (typeof value === "object") {
-      return Object.values(value).some((v) => v !== null && v !== undefined && v !== "")
+      return Object.values(value).some(
+        (v) => v !== null && v !== undefined && v !== "",
+      )
         ? count + 1
         : count;
     }
@@ -814,8 +927,10 @@ const showEllipsis = computed(
 
 const buildFetchParams = () => {
   const params: DataTableFetchParams = {
-    page: props.usePagination && !props.hierarchy ? currentPage.value : undefined,
-    per_page: props.usePagination && !props.hierarchy ? perPage.value : undefined,
+    page:
+      props.usePagination && !props.hierarchy ? currentPage.value : undefined,
+    per_page:
+      props.usePagination && !props.hierarchy ? perPage.value : undefined,
     search: searchQuery.value || undefined,
     sort_by: sortKey.value || undefined,
     sort_order: sortOrder.value || undefined,
@@ -939,7 +1054,8 @@ const updateCustomFilter = (key: string, value: any) => {
 
 const validateDateRange = (key: string) => {
   const filter = filters.value[key];
-  if (filter.start && filter.end && filter.start > filter.end) filter.end = null;
+  if (filter.start && filter.end && filter.start > filter.end)
+    filter.end = null;
 };
 
 const validateNumberRange = (key: string) => {
@@ -947,10 +1063,17 @@ const validateNumberRange = (key: string) => {
   if (filter.min && filter.max && filter.min > filter.max) filter.max = null;
 };
 
-const handleAction = ({ action, row }: { action: DataTableAction; row: any }) => {
+const handleAction = ({
+  action,
+  row,
+}: {
+  action: DataTableAction;
+  row: any;
+}) => {
   if (action.requiresConfirmation) {
     confirmMessage.value =
-      action.confirmationMessage || `Are you sure you want to ${action.label.toLowerCase()}?`;
+      action.confirmationMessage ||
+      `Are you sure you want to ${action.label.toLowerCase()}?`;
     pendingAction.value = { action, row };
     showConfirmDialog.value = true;
   } else {
@@ -968,7 +1091,8 @@ const executeConfirmedAction = () => {
 };
 
 const toggleSort = (key: string) => {
-  if (sortKey.value === key) sortOrder.value = sortOrder.value === "asc" ? "desc" : "asc";
+  if (sortKey.value === key)
+    sortOrder.value = sortOrder.value === "asc" ? "desc" : "asc";
   else {
     sortKey.value = key;
     sortOrder.value = "asc";
@@ -995,8 +1119,12 @@ const getActionsColumnWidth = () => {
   if (!props.actions) return "w-[50px]";
   if (actionDisplayMode.value === "horizontal") {
     const actionCount = props.actions.length;
-    const partitionCount = partitionActions.value ? actionPartitions.value.length : 1;
-    const separatorWidth = partitionActions.value ? (partitionCount - 1) * 16 : 0;
+    const partitionCount = partitionActions.value
+      ? actionPartitions.value.length
+      : 1;
+    const separatorWidth = partitionActions.value
+      ? (partitionCount - 1) * 16
+      : 0;
     const buttonWidth = actionCount * 36 + separatorWidth;
     return `w-[${Math.max(buttonWidth, 120)}px]`;
   }
@@ -1019,7 +1147,6 @@ const handleDragEnd = async () => {
   }));
 
   try {
-    isReordering.value = true;
     await props.draggableConfig.onReorder(items);
     emit("reorder-end", items);
 
@@ -1030,8 +1157,6 @@ const handleDragEnd = async () => {
   } catch {
     // Revert to original order on failure - refetch data
     await fetchData();
-  } finally {
-    isReordering.value = false;
   }
 };
 
@@ -1041,6 +1166,14 @@ const handleDragEnd = async () => {
 const toggleDragMode = () => {
   isDragModeActive.value = !isDragModeActive.value;
 };
+
+/**
+ * Transition config for draggable rows
+ */
+const draggableComponentData = computed(() => {
+  const name = props.draggableConfig?.transitionName || "row-flip";
+  return { name, type: "transition-group" };
+});
 
 watch(
   () => props.columns,
@@ -1084,9 +1217,27 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => emitter.off(props.refreshKey));
+
+defineExpose({
+  resetFilters,
+});
 </script>
 
 <style scoped>
+.row-flip-move {
+  transition: transform 0.2s ease;
+}
+
+.row-flip-enter-active,
+.row-flip-leave-active {
+  transition: opacity 0.15s ease;
+}
+
+.row-flip-enter-from,
+.row-flip-leave-to {
+  opacity: 0;
+}
+
 .transition-all {
   transition-property: all;
   transition-duration: 200ms;

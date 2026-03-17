@@ -5,7 +5,11 @@
         <SidebarMenuItem>
           <div as-child class="text-lg rounded-lg font-bold bg-background">
             <router-link to="/" class="flex items-center gap-2">
-              <img src="../assets/images/logo.png" alt="who-logo" class="w-44 h-auto" />
+              <img
+                src="../assets/images/logo.png"
+                alt="who-logo"
+                class="w-44 h-auto"
+              />
             </router-link>
           </div>
         </SidebarMenuItem>
@@ -51,7 +55,10 @@
               <p class="text-sm text-muted-foreground">Loading...</p>
             </div>
             <template v-else>
-              <SidebarMenuItem v-for="item in filteredNavItems" :key="item.title">
+              <SidebarMenuItem
+                v-for="item in filteredNavItems"
+                :key="item.title"
+              >
                 <PermissionGuard v-bind="getPermissionProps(item.permission)">
                   <div v-if="item.children?.length">
                     <SidebarItemTooltip :label="item.title">
@@ -82,16 +89,27 @@
                         </CollapsibleTrigger>
                         <CollapsibleContent>
                           <SidebarMenuSub>
-                            <SidebarMenuSubItem v-for="child in item.children" :key="child.title">
-                              <PermissionGuard v-bind="getPermissionProps(child.permission)">
+                            <SidebarMenuSubItem
+                              v-for="child in item.children"
+                              :key="child.title"
+                            >
+                              <PermissionGuard
+                                v-bind="getPermissionProps(child.permission)"
+                              >
                                 <SidebarMenuButton
                                   as-child
                                   class="hover:bg-sidebar-accent text-sidebar-foreground hover:text-sidebar-accent-foreground h-auto rounded-lg items-center p-[10px] transition-all duration-300"
                                   :class="{ active: isActive(child.url) }"
                                   @click="onChildItemClick(item.title)"
                                 >
-                                  <router-link :to="child.url" class="flex items-center gap-2">
-                                    <Iconify :icon="child.icon" class="h-4 w-4" />
+                                  <router-link
+                                    :to="child.url"
+                                    class="flex items-center gap-2"
+                                  >
+                                    <Iconify
+                                      :icon="child.icon"
+                                      class="h-4 w-4"
+                                    />
                                     <span>{{ child.title }}</span>
                                   </router-link>
                                 </SidebarMenuButton>
@@ -110,7 +128,10 @@
                         :class="{ active: isActive(item.url) }"
                         @click="ensureSidebarOpen"
                       >
-                        <router-link :to="item.url" class="flex items-center gap-2 w-full">
+                        <router-link
+                          :to="item.url"
+                          class="flex items-center gap-2 w-full"
+                        >
                           <Iconify :icon="item.icon" class="h-4 w-4" />
                           <span>{{ item.title }}</span>
                         </router-link>
@@ -213,7 +234,10 @@ const handleLogout = async () => {
     await authStore.logout();
     router.push({ name: "Login" });
   } catch (error) {
-    console.error("Logout failed:", error instanceof Error ? error.message : String(error));
+    console.error(
+      "Logout failed:",
+      error instanceof Error ? error.message : String(error),
+    );
     // Even if logout fails, redirect to login
     router.push({ name: "Login" });
   }
@@ -249,6 +273,15 @@ const navItems = computed(() => {
       url: "/sliders",
       icon: "lucide:landmark",
       permission: "list-sliders",
+    });
+  }
+
+  if (authStore.hasPermission("list-partners")) {
+    items.push({
+      title: "Partners",
+      url: "/partners",
+      icon: "lucide:users",
+      permission: "list-partners",
     });
   }
 
@@ -302,7 +335,9 @@ const navItems = computed(() => {
     });
   }
 
-  if (authStore.hasAnyPermission(["list-download-categories", "list-downloads"])) {
+  if (
+    authStore.hasAnyPermission(["list-download-categories", "list-downloads"])
+  ) {
     items.push({
       title: "Downloads",
       url: "/",
@@ -366,7 +401,14 @@ const navItems = computed(() => {
     });
   }
 
-  if (authStore.hasAnyPermission(["view-users", "list-users", "create-users", "list-settings"])) {
+  if (
+    authStore.hasAnyPermission([
+      "view-users",
+      "list-users",
+      "create-users",
+      "list-settings",
+    ])
+  ) {
     items.push({
       title: "Admin",
       url: "/",
@@ -414,7 +456,9 @@ const filteredNavItems = computed(() => {
         }
         return null;
       }
-      return item.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ? item : null;
+      return item.title.toLowerCase().includes(searchQuery.value.toLowerCase())
+        ? item
+        : null;
     })
     .filter((item): item is NonNullable<NavItem> => item !== null);
 });

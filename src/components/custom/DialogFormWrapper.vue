@@ -33,8 +33,13 @@ const emit = defineEmits<{
         <template v-if="props.mode === 'upload'">Upload Excel</template>
         <template v-else>{{ props.editTag ? "Edit" : "Create" }}</template>
       </DialogTitle>
-      <DialogDescription id="tag-dialog-description" class="text-sm text-muted-foreground">
-        <template v-if="props.mode === 'upload'"> Select an Excel file to upload data. </template>
+      <DialogDescription
+        id="tag-dialog-description"
+        class="text-sm text-muted-foreground"
+      >
+        <template v-if="props.mode === 'upload'">
+          Select an Excel file to upload data.
+        </template>
         <template v-else>
           {{
             props.editTag
@@ -46,7 +51,9 @@ const emit = defineEmits<{
     </DialogHeader>
     <slot />
     <DialogFooter class="mt-6">
-      <Button variant="outline" @click="emit('cancel')" class="py-2 rounded-md"> Cancel </Button>
+      <Button variant="outline" @click="emit('cancel')" class="py-2 rounded-md">
+        Cancel
+      </Button>
       <!-- Button for form mode -->
       <Button
         v-if="props.mode !== 'upload'"

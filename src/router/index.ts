@@ -78,7 +78,10 @@ const routes = [
             path: "municipality",
             name: "Municipality",
             component: () => import("@/views/setup/Municipality.vue"),
-            meta: { requiresAuth: true, requiredPermission: "municipality-list" },
+            meta: {
+              requiresAuth: true,
+              requiredPermission: "municipality-list",
+            },
           },
           {
             path: "aefi",
@@ -90,13 +93,19 @@ const routes = [
             path: "district-population",
             name: "DistrictPopulation",
             component: () => import("@/views/setup/DistrictPopulation.vue"),
-            meta: { requiresAuth: true, requiredPermission: "districtpopulation-list" },
+            meta: {
+              requiresAuth: true,
+              requiredPermission: "districtpopulation-list",
+            },
           },
           {
             path: "reportingunit",
             name: "ReportingUnit",
             component: () => import("@/views/setup/ReportingUnit.vue"),
-            meta: { requiresAuth: true, requiredPermission: "reportingunit-list" },
+            meta: {
+              requiresAuth: true,
+              requiredPermission: "reportingunit-list",
+            },
           },
         ],
       },
@@ -105,6 +114,12 @@ const routes = [
         path: "sliders",
         name: "Slider",
         component: () => import("@/views/sliders/Slider.vue"),
+      },
+      {
+        path: "partners",
+        name: "Partner",
+        component: () => import("@/views/partners/Partner.vue"),
+        meta: { requiresAuth: true, requiredPermission: "list-partners" },
       },
       {
         path: "menus",
@@ -133,8 +148,12 @@ const routes = [
       {
         path: "download-categories",
         name: "DownloadCategory",
-        component: () => import("@/views/downloadCategories/DownloadCategory.vue"),
-        meta: { requiresAuth: true, requiredPermission: "list-download-categories" },
+        component: () =>
+          import("@/views/downloadCategories/DownloadCategory.vue"),
+        meta: {
+          requiresAuth: true,
+          requiredPermission: "list-download-categories",
+        },
       },
       {
         path: "contacts",
@@ -163,8 +182,12 @@ const routes = [
       {
         path: "committee-members",
         name: "CommitteeMember",
-        component: () => import("@/views/committeeMembers/CommitteeMembers.vue"),
-        meta: { requiresAuth: true, requiredPermission: "list-committee-members" },
+        component: () =>
+          import("@/views/committeeMembers/CommitteeMembers.vue"),
+        meta: {
+          requiresAuth: true,
+          requiredPermission: "list-committee-members",
+        },
       },
       {
         path: "news-notices",

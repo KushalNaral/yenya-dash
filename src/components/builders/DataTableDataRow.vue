@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { cn } from "@/lib/utils";
-import type { ActionDisplayMode, DataTableAction, DataTableColumn } from "@/types/datatable";
+import type {
+  ActionDisplayMode,
+  DataTableAction,
+  DataTableColumn,
+} from "@/types/datatable";
 import { useSlots } from "vue";
 
 const slots = useSlots();
@@ -46,7 +50,12 @@ const props = withDefaults(
   },
 );
 
-const emit = defineEmits(["row-click", "row-double-click", "toggle-row", "handle-action"]);
+const emit = defineEmits([
+  "row-click",
+  "row-double-click",
+  "toggle-row",
+  "handle-action",
+]);
 
 const getNestedValue = (obj: any, key: string) =>
   key.split(".").reduce((o, k) => (o ? o[k] : ""), obj);
@@ -73,6 +82,9 @@ const getActionButtonClass = (action: any) => {
       return "bg-primary text-primary-foreground hover:bg-primary/80";
   }
 };
+
+const shouldTruncate = (column: DataTableColumn<any>) =>
+  !column.cellClassName?.includes("text-pretty");
 
 const getActionMenuItemClass = (action: any) => {
   switch (action.variant) {
@@ -113,19 +125,24 @@ const handleActionClick = (a: any, r: any) => {
 
 <template>
   <TableRow
-    class="transition-all duration-200 cursor-pointer"
+    class="transition-all duration-200"
     :class="{
-      'hover:bg-muted/50': showRowHover,
+      'cursor-pointer': !showDragHandle,
+      'hover:bg-muted/50': showRowHover && !showDragHandle,
       'bg-muted/10': alternatingRows && rowIndex % 2 === 0,
     }"
-    @click="handleRowClick"
-    @dblclick="handleRowDoubleClick"
+    @click="!showDragHandle && handleRowClick($event)"
+    @dblclick="!showDragHandle && handleRowDoubleClick($event)"
   >
-    <TableCell v-if="showDragHandle" class="w-10 p-2">
-      <div class="drag-handle cursor-grab active:cursor-grabbing flex items-center justify-center">
+    <TableCell v-if="showDragHandle" class="w-10 p-2" @click.stop>
+      <div
+        class="drag-handle cursor-grab active:cursor-grabbing flex items-center justify-center touch-none"
+        @mousedown.stop
+        @touchstart.stop
+      >
         <Iconify
           icon="lucide:grip-vertical"
-          class="size-4 text-muted-foreground hover:text-primary"
+          class="size-4 text-muted-foreground hover:text-primary pointer-events-none"
         />
       </div>
     </TableCell>
@@ -133,11 +150,16 @@ const handleActionClick = (a: any, r: any) => {
     <TableCell
       v-for="(column, colIndex) in visibleColumns"
       :key="column.accessorKey"
-      class="p-2 transition-all duration-200"
-      :class="column.cellClassName"
-      :style="{ paddingLeft: colIndex === 0 ? `${level * 1.5 + 1}rem` : undefined }"
+      class="p-2 transition-all duration-200 min-w-0 overflow-hidden"
+      :class="[
+        column.cellClassName,
+        shouldTruncate(column) && 'whitespace-nowrap',
+      ]"
+      :style="{
+        paddingLeft: colIndex === 0 ? `${level * 1.5 + 1}rem` : undefined,
+      }"
     >
-      <div class="flex items-center">
+      <div class="flex items-center min-w-0 overflow-hidden">
         <!-- Expand/Collapse -->
         <Button
           v-if="colIndex === 0 && hasChildren"
@@ -153,7 +175,10 @@ const handleActionClick = (a: any, r: any) => {
         </Button>
 
         <!-- Serial Number -->
-        <span v-if="showSN && column.accessorKey === 'sn'" class="text-foreground">
+        <span
+          v-if="showSN && column.accessorKey === 'sn'"
+          class="text-foreground"
+        >
           {{ row.point_no || rowIndex + 1 + (currentPage - 1) * perPage }}
         </span>
 
@@ -174,6 +199,11 @@ const handleActionClick = (a: any, r: any) => {
           :value="getNestedValue(row, column.accessorKey)"
           :column="column"
           :rowIndex="rowIndex"
+          :class="
+            typeof column.cell === 'function' && shouldTruncate(column)
+              ? 'truncate block max-w-full'
+              : undefined
+          "
           v-html="
             typeof column.cell === 'function'
               ? (column.cell as Function)({
@@ -190,21 +220,37 @@ const handleActionClick = (a: any, r: any) => {
         <Badge
           v-else-if="column.badge"
           :variant="getBadgeVariant(row, column)"
-          class="transition-all duration-200"
+          :class="[
+            'transition-all duration-200',
+            shouldTruncate(column) && 'truncate max-w-full',
+          ]"
         >
-          {{ formatCellValue(row, column) }}
+          <span v-if="shouldTruncate(column)" class="truncate block">{{
+            formatCellValue(row, column)
+          }}</span>
+          <template v-else>{{ formatCellValue(row, column) }}</template>
         </Badge>
 
         <!-- Default -->
-        <span v-else class="text-foreground">
-          {{ formatCellValue(row, column) }}
+        <span
+          v-else
+          :class="[
+            'text-foreground',
+            shouldTruncate(column) && 'truncate block max-w-full',
+          ]"
+        >
+          <span v-if="column.html" v-html="formatCellValue(row, column)" />
+          <template v-else>{{ formatCellValue(row, column) }}</template>
         </span>
       </div>
     </TableCell>
 
     <!-- Actions -->
     <TableCell v-if="actions && actions.length" class="py-4">
-      <div v-if="actionDisplayMode === 'horizontal'" class="flex items-center gap-1">
+      <div
+        v-if="actionDisplayMode === 'horizontal'"
+        class="flex items-center gap-1"
+      >
         <!-- Partitioned -->
         <template v-if="partitionActions">
           <div
@@ -224,8 +270,14 @@ const handleActionClick = (a: any, r: any) => {
                       @click.stop="handleActionClick(action, row)"
                       :disabled="action.disabled?.(row) || false"
                     >
-                      <Iconify :icon="action.icon" v-if="action.icon" class="size-4" />
-                      <span v-else class="text-xs">{{ action.label.charAt(0) }}</span>
+                      <Iconify
+                        :icon="action.icon"
+                        v-if="action.icon"
+                        class="size-4"
+                      />
+                      <span v-else class="text-xs">{{
+                        action.label.charAt(0)
+                      }}</span>
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
@@ -256,8 +308,14 @@ const handleActionClick = (a: any, r: any) => {
                     @click.stop="handleActionClick(action, row)"
                     :disabled="action.disabled?.(row) || false"
                   >
-                    <Iconify :icon="action.icon" v-if="action.icon" class="size-4" />
-                    <span v-else class="text-xs">{{ action.label.charAt(0) }}</span>
+                    <Iconify
+                      :icon="action.icon"
+                      v-if="action.icon"
+                      class="size-4"
+                    />
+                    <span v-else class="text-xs">{{
+                      action.label.charAt(0)
+                    }}</span>
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
@@ -283,21 +341,38 @@ const handleActionClick = (a: any, r: any) => {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" class="min-w-[160px]">
           <template v-if="partitionActions">
-            <div v-for="(partition, partitionIndex) in actionPartitions" :key="partitionIndex">
+            <div
+              v-for="(partition, partitionIndex) in actionPartitions"
+              :key="partitionIndex"
+            >
               <template v-for="action in partition" :key="action.label">
-                <PermissionGuard v-if="action.permission" :permission="action.permission">
+                <PermissionGuard
+                  v-if="action.permission"
+                  :permission="action.permission"
+                >
                   <DropdownMenuItem
                     @click="handleActionClick(action, row)"
                     :variant="action.variant ?? 'default'"
-                    :class="cn('gap-1 cursor-pointer duration-200', getActionMenuItemClass(action))"
+                    :class="
+                      cn(
+                        'gap-1 cursor-pointer duration-200',
+                        getActionMenuItemClass(action),
+                      )
+                    "
                     :disabled="action.disabled?.(row) || false"
                   >
-                    <Iconify :icon="action.icon" v-if="action.icon" class="size-4 mr-1" />
+                    <Iconify
+                      :icon="action.icon"
+                      v-if="action.icon"
+                      class="size-4 mr-1"
+                    />
                     {{ action.label }}
                   </DropdownMenuItem>
                 </PermissionGuard>
               </template>
-              <DropdownMenuSeparator v-if="partitionIndex < actionPartitions.length - 1" />
+              <DropdownMenuSeparator
+                v-if="partitionIndex < actionPartitions.length - 1"
+              />
             </div>
           </template>
           <template v-else>
@@ -305,10 +380,19 @@ const handleActionClick = (a: any, r: any) => {
               <DropdownMenuItem
                 @click="handleActionClick(action, row)"
                 :variant="action.variant ?? 'default'"
-                :class="cn('gap-1 cursor-pointer duration-200', getActionMenuItemClass(action))"
+                :class="
+                  cn(
+                    'gap-1 cursor-pointer duration-200',
+                    getActionMenuItemClass(action),
+                  )
+                "
                 :disabled="action.disabled?.(row) || false"
               >
-                <Iconify :icon="action.icon" v-if="action.icon" class="size-4 mr-1" />
+                <Iconify
+                  :icon="action.icon"
+                  v-if="action.icon"
+                  class="size-4 mr-1"
+                />
                 {{ action.label }}
               </DropdownMenuItem>
             </template>
