@@ -269,7 +269,7 @@ const navItems = computed(() => {
 
   if (authStore.hasPermission("list-sliders")) {
     items.push({
-      title: "Sliders",
+      title: "Projects",
       url: "/sliders",
       icon: "lucide:landmark",
       permission: "list-sliders",
@@ -294,7 +294,7 @@ const navItems = computed(() => {
     });
   }
 
-  if (authStore.hasPermission("list-news-notices")) {
+  if (authStore.hasPermission("list-news-notices") && false) {
     items.push({
       title: "News and Notices",
       url: "/news-notices",
@@ -303,7 +303,7 @@ const navItems = computed(() => {
     });
   }
 
-  if (authStore.hasPermission("list-committee-members")) {
+  if (authStore.hasPermission("list-committee-members") && false) {
     items.push({
       title: "Committee Members",
       url: "/committee-members",
@@ -312,7 +312,10 @@ const navItems = computed(() => {
     });
   }
 
-  if (authStore.hasAnyPermission(["list-faq-categories", "list-faqs"])) {
+  if (
+    authStore.hasAnyPermission(["list-faq-categories", "list-faqs"]) &&
+    false
+  ) {
     items.push({
       title: "FAQs",
       url: "/",
@@ -336,7 +339,11 @@ const navItems = computed(() => {
   }
 
   if (
-    authStore.hasAnyPermission(["list-download-categories", "list-downloads"])
+    authStore.hasAnyPermission([
+      "list-download-categories",
+      "list-downloads",
+    ]) &&
+    false
   ) {
     items.push({
       title: "Downloads",
@@ -369,7 +376,10 @@ const navItems = computed(() => {
     });
   }
 
-  if (authStore.hasAnyPermission(["list-careers", "list-open-careers"])) {
+  if (
+    authStore.hasAnyPermission(["list-careers", "list-open-careers"]) &&
+    false
+  ) {
     items.push({
       title: "Careers",
       url: "/",

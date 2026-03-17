@@ -84,7 +84,8 @@ export function useSettingForm(
           label: "Site Title",
           placeholder: "Enter Site title",
           maxLength: 255,
-          helpText: "Site title in the main homepage",
+          helpText:
+            "Site title in the main homepage. Use ( || ) to split the features.",
           group: "Title Settings",
         },
         {
