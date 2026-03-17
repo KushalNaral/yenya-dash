@@ -9,7 +9,9 @@
         aria-label="Toggle sidebar"
       >
       </SidebarTrigger>
-      <h1 class="text-2xl font-bold tracking-tight text-primary">MCL Dashboard</h1>
+      <h1 class="text-2xl font-bold tracking-tight text-primary">
+        YenyaSoft Dashboard
+      </h1>
       <p class="text-sm text-gray-500 dark:text-gray-400"></p>
     </div>
 
@@ -51,7 +53,9 @@
             >
               {{ authStore.user?.username?.charAt(0)?.toUpperCase() || "U" }}
             </div>
-            <span class="hidden sm:block text-sm font-medium truncate max-w-[120px]">
+            <span
+              class="hidden sm:block text-sm font-medium truncate max-w-[120px]"
+            >
               {{ authStore.user?.username }}
             </span>
             <Iconify icon="lucide:chevron-down" class="size-4 text-gray-500" />
@@ -61,12 +65,17 @@
         <DropdownMenuContent align="end" class="w-56 p-2">
           <div class="flex flex-col space-y-1 p-2">
             <p class="text-sm font-medium">{{ authStore.user?.username }}</p>
-            <p class="text-xs text-muted-foreground">{{ authStore.user?.email }}</p>
+            <p class="text-xs text-muted-foreground">
+              {{ authStore.user?.email }}
+            </p>
           </div>
 
           <DropdownMenuSeparator />
 
-          <div v-if="authStore.user?.roles?.length" class="flex flex-wrap gap-1 p-2">
+          <div
+            v-if="authStore.user?.roles?.length"
+            class="flex flex-wrap gap-1 p-2"
+          >
             <Badge
               v-for="role in authStore.user?.roles"
               :key="role"
@@ -118,7 +127,10 @@ async function logout() {
     await authStore.logout();
     router.push({ name: "Login" });
   } catch (error) {
-    console.error("Logout failed:", error instanceof Error ? error.message : String(error));
+    console.error(
+      "Logout failed:",
+      error instanceof Error ? error.message : String(error),
+    );
     router.push({ name: "Login" });
   }
 }

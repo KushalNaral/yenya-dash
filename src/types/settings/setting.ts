@@ -1,19 +1,22 @@
 export interface Setting {
   id?: number;
-  information_officer_name?: string;
-  information_officer_number?: string;
-  information_officer_email?: string;
   map_location?: string;
   location?: string;
   email?: string;
   phone?: string;
+  whatsapp_number?: string;
+  site_title?: string;
+  site_caption?: string;
+  partner_title?: string;
+  solution_title?: string;
+  digital_title?: string;
+  footer_title?: string;
   fb_link?: string;
   yt_link?: string;
   insta_link?: string;
   linkedin_link?: string;
   copyright?: string;
   is_maintainance_mode?: boolean;
-  inflation_rate?: string;
   popup_duration?: number;
   primary_image?: {
     url: string;
@@ -26,20 +29,23 @@ export interface Setting {
 }
 
 export interface CreateSettingData {
-  information_officer_name?: string;
-  information_officer_number?: string;
-  information_officer_email?: string;
   map_location?: string;
   location?: string;
   email?: string;
   phone?: string;
+  whatsapp_number?: string;
+  site_title?: string;
+  site_caption?: string;
+  partner_title?: string;
+  solution_title?: string;
+  digital_title?: string;
+  footer_title?: string;
   fb_link?: string;
   yt_link?: string;
   insta_link?: string;
   linkedin_link?: string;
   copyright?: string;
   is_maintainance_mode?: boolean;
-  inflation_rate?: string;
   popup_duration?: number;
   assets?: File | null | string;
 }

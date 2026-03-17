@@ -93,7 +93,7 @@ const onSubmit = form.handleSubmit(async (values) => {
       <div class="text-center">
         <img
           src="/src/assets/images/logo.png"
-          alt="MCL Logo"
+          alt="YenyaSoft Logo"
           class="mx-auto h-12 w-auto"
         />
         <h2 class="mt-6 text-3xl font-extrabold text-foreground">

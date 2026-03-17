@@ -5,7 +5,12 @@ const loadingStore = useLoadingStore();
 
 <template>
   <Teleport to="body">
-    <div v-if="loadingStore.isGlobalLoading" class="overlay" role="status" aria-live="polite">
+    <div
+      v-if="loadingStore.isGlobalLoading"
+      class="overlay"
+      role="status"
+      aria-live="polite"
+    >
       <div class="grid place-items-center gap-4 p-4">
         <div class="loading">
           <svg width="140" height="110" viewBox="0 0 64 48" aria-hidden="true">
@@ -21,7 +26,9 @@ const loadingStore = useLoadingStore();
         </div>
         <div class="flex items-center gap-2">
           <div>
-            <p class="text-lg font-bold text-primary dark:text-white">MCL Dashboard</p>
+            <p class="text-lg font-bold text-primary dark:text-white">
+              YenyaSoft Dashboard
+            </p>
           </div>
           <div class="dots">
             <span></span>
