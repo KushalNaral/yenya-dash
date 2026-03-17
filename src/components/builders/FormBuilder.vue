@@ -50,7 +50,10 @@ const getCalendarDateValue = (fieldName: string) => {
   return toCalendarDate(value);
 };
 
-const setDateFromCalendar = (fieldName: string, calendarDate: any | null | undefined) => {
+const setDateFromCalendar = (
+  fieldName: string,
+  calendarDate: any | null | undefined,
+) => {
   if (!calendarDate) {
     formData.value[fieldName] = null;
     return;
@@ -79,7 +82,10 @@ const getMaxDate = (field: FormField) => {
 };
 
 const filePreviews = ref<
-  Record<string, Array<{ url: string; name: string; size: number; type: string }>>
+  Record<
+    string,
+    Array<{ url: string; name: string; size: number; type: string }>
+  >
 >({});
 const isSubmitting = ref(false);
 const isDirty = ref(false);
@@ -115,7 +121,11 @@ watch(
       return val !== undefined && val !== null && val !== "";
     }).length;
 
-    if (currentNonEmptyCount > newNonEmptyCount || hasUserData.value || isDirty.value) {
+    if (
+      currentNonEmptyCount > newNonEmptyCount ||
+      hasUserData.value ||
+      isDirty.value
+    ) {
       Object.keys(newVal).forEach((key) => {
         if (
           !(key in formData.value) ||
@@ -187,11 +197,20 @@ const validateField = (field: FormField, value: any): string => {
     if (field.type === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
       return "Invalid email format";
     }
-    if (field.maxLength && typeof value === "string" && value.length > field.maxLength) {
+    if (
+      field.maxLength &&
+      typeof value === "string" &&
+      value.length > field.maxLength
+    ) {
       return `Must not exceed ${field.maxLength} characters`;
     }
   }
-  if (field.type === "number" && value !== undefined && value !== null && value !== "") {
+  if (
+    field.type === "number" &&
+    value !== undefined &&
+    value !== null &&
+    value !== ""
+  ) {
     const numValue = Number(value);
     if (isNaN(numValue)) {
       return `${field.label} must be a valid number`;
@@ -210,7 +229,11 @@ const validateField = (field: FormField, value: any): string => {
       return `Invalid selection for ${field.label}`;
     }
   }
-  if (["multi-select", "tree-select"].includes(field.type) && value && field.options) {
+  if (
+    ["multi-select", "tree-select"].includes(field.type) &&
+    value &&
+    field.options
+  ) {
     const validOptions = flattenOptions(field.options).map((opt) => opt.value);
     const values = Array.isArray(value) ? value : [value];
     if (values.some((val) => val && !validOptions.includes(val))) {
@@ -236,7 +259,9 @@ const validateField = (field: FormField, value: any): string => {
   if (field.validator) {
     const customValidation = field.validator(value);
     if (customValidation !== true) {
-      return typeof customValidation === "string" ? customValidation : "Invalid value";
+      return typeof customValidation === "string"
+        ? customValidation
+        : "Invalid value";
     }
   }
 
@@ -259,7 +284,9 @@ const validateForm = (): boolean => {
 const isFieldVisible = (field: FormField) => {
   if (!field.showIf) return true;
 
-  const conditions = Array.isArray(field.showIf) ? field.showIf : [field.showIf];
+  const conditions = Array.isArray(field.showIf)
+    ? field.showIf
+    : [field.showIf];
   return conditions.every((cond: ShowIfCondition) => {
     const value = formData.value[cond.field];
     const target = cond.value ?? cond.values;
@@ -308,7 +335,9 @@ const isFieldVisible = (field: FormField) => {
 };
 
 const visibleFields = computed(() => {
-  return props.config.fields.filter((field: FormField) => isFieldVisible(field));
+  return props.config.fields.filter((field: FormField) =>
+    isFieldVisible(field),
+  );
 });
 
 /**
@@ -319,7 +348,8 @@ const visibleFields = computed(() => {
  */
 const groupedFields = computed(() => {
   const result: Array<{ groupName: string | null; fields: FormField[] }> = [];
-  let currentGroup: { groupName: string | null; fields: FormField[] } | null = null;
+  let currentGroup: { groupName: string | null; fields: FormField[] } | null =
+    null;
 
   visibleFields.value.forEach((field) => {
     const fieldGroup = field.group || null;
@@ -375,9 +405,15 @@ const clearFieldData = (fieldName: string, fieldConfig?: FormField) => {
 
   // Determine the appropriate reset value based on field type
   if (fieldConfig) {
-    if (fieldConfig.type === "multiple-file" || fieldConfig.type === "tree-select") {
+    if (
+      fieldConfig.type === "multiple-file" ||
+      fieldConfig.type === "tree-select"
+    ) {
       resetTo = [];
-    } else if (fieldConfig.type === "checkbox" || fieldConfig.type === "switch") {
+    } else if (
+      fieldConfig.type === "checkbox" ||
+      fieldConfig.type === "switch"
+    ) {
       resetTo = false;
     } else if (fieldConfig.type === "radio") {
       resetTo = null;
@@ -399,7 +435,9 @@ watch(visibleFields, (newFields, oldFields) => {
   if (oldFields && newFields) {
     const oldFieldNames = oldFields.map((f) => f.name);
     const newFieldNames = newFields.map((f) => f.name);
-    const nowHidden = oldFieldNames.filter((name) => !newFieldNames.includes(name));
+    const nowHidden = oldFieldNames.filter(
+      (name) => !newFieldNames.includes(name),
+    );
 
     const allFieldNames = props.config.fields.map((f) => f.name);
     nowHidden.forEach((fieldName) => {
@@ -440,7 +478,9 @@ const getDependentFields = (): Set<string> => {
   const dependentFields = new Set<string>();
   props.config.fields.forEach((field) => {
     if (field.showIf) {
-      const conditions = Array.isArray(field.showIf) ? field.showIf : [field.showIf];
+      const conditions = Array.isArray(field.showIf)
+        ? field.showIf
+        : [field.showIf];
       conditions.forEach((cond: ShowIfCondition) => {
         if (cond.field) {
           dependentFields.add(cond.field);
@@ -493,7 +533,11 @@ watch(
             Array.isArray(resetTo) &&
             resetTo.length === 0
           ) &&
-          !(Array.isArray(currentValue) && currentValue.length === 0 && resetTo === null);
+          !(
+            Array.isArray(currentValue) &&
+            currentValue.length === 0 &&
+            resetTo === null
+          );
 
         if (needsClearing) {
           clearingFields.add(field.name);
@@ -507,6 +551,61 @@ watch(
   },
   { deep: true, immediate: false },
 );
+
+const updateFilePreviews = (
+  field: FormField,
+  files: File | File[] | string | any | null,
+) => {
+  // Only revoke if the existing previews are Blob URLs (created by URL.createObjectURL)
+  if (filePreviews.value[field.name]) {
+    filePreviews.value[field.name].forEach((preview) => {
+      if (preview.url && preview.url.startsWith("blob:")) {
+        URL.revokeObjectURL(preview.url);
+      }
+    });
+  }
+
+  filePreviews.value[field.name] = [];
+  if (!files) return;
+
+  const fileList = Array.isArray(files) ? files : [files];
+  fileList.forEach((file) => {
+    if (file && file instanceof File) {
+      const preview = {
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        url: file.type.startsWith("image/") ? URL.createObjectURL(file) : "",
+      };
+      filePreviews.value[field.name].push(preview);
+    } else if (
+      typeof file === "string" &&
+      (file.startsWith("http") || file.startsWith("/"))
+    ) {
+      // It's an existing URL
+      filePreviews.value[field.name].push({
+        name: file.split("/").pop() || "Existing File",
+        size: 0,
+        type: file.match(/\.(jpg|jpeg|png|gif|webp)$/i)
+          ? "image/jpeg"
+          : "application/octet-stream",
+        url: file,
+      });
+    } else if (file && typeof file === "object" && file.url) {
+      // It's an asset object
+      filePreviews.value[field.name].push({
+        name: file.name || file.url.split("/").pop() || "Existing File",
+        size: file.size || 0,
+        type:
+          file.type ||
+          (file.url.match(/\.(jpg|jpeg|png|gif|webp)$/i)
+            ? "image/jpeg"
+            : "application/octet-stream"),
+        url: file.url,
+      });
+    }
+  });
+};
 
 /**
  * Watches for changes to formData and updates fields with computedValue.
@@ -537,7 +636,8 @@ watch(
         // and we don't want to overwrite new file selections
         if (
           value &&
-          (!filePreviews.value[field.name] || filePreviews.value[field.name].length === 0)
+          (!filePreviews.value[field.name] ||
+            filePreviews.value[field.name].length === 0)
         ) {
           if (
             typeof value === "string" ||
@@ -626,53 +726,6 @@ const flattenOptions = (options: any[]): any[] => {
   }, []);
 };
 
-const updateFilePreviews = (field: FormField, files: File | File[] | string | any | null) => {
-  // Only revoke if the existing previews are Blob URLs (created by URL.createObjectURL)
-  if (filePreviews.value[field.name]) {
-    filePreviews.value[field.name].forEach((preview) => {
-      if (preview.url && preview.url.startsWith("blob:")) {
-        URL.revokeObjectURL(preview.url);
-      }
-    });
-  }
-
-  filePreviews.value[field.name] = [];
-  if (!files) return;
-
-  const fileList = Array.isArray(files) ? files : [files];
-  fileList.forEach((file) => {
-    if (file && file instanceof File) {
-      const preview = {
-        name: file.name,
-        size: file.size,
-        type: file.type,
-        url: file.type.startsWith("image/") ? URL.createObjectURL(file) : "",
-      };
-      filePreviews.value[field.name].push(preview);
-    } else if (typeof file === "string" && (file.startsWith("http") || file.startsWith("/"))) {
-      // It's an existing URL
-      filePreviews.value[field.name].push({
-        name: file.split("/").pop() || "Existing File",
-        size: 0,
-        type: file.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? "image/jpeg" : "application/octet-stream",
-        url: file,
-      });
-    } else if (file && typeof file === "object" && file.url) {
-      // It's an asset object
-      filePreviews.value[field.name].push({
-        name: file.name || file.url.split("/").pop() || "Existing File",
-        size: file.size || 0,
-        type:
-          file.type ||
-          (file.url.match(/\.(jpg|jpeg|png|gif|webp)$/i)
-            ? "image/jpeg"
-            : "application/octet-stream"),
-        url: file.url,
-      });
-    }
-  });
-};
-
 const revokeFilePreviews = (name: string) => {
   if (filePreviews.value[name]) {
     filePreviews.value[name].forEach((preview) => {
@@ -720,7 +773,8 @@ const getFieldClasses = computed(() => {
   }
 
   // Grid layout
-  const columns = props.config.columns || (props.config.fields.length > 1 ? 2 : 1);
+  const columns =
+    props.config.columns || (props.config.fields.length > 1 ? 2 : 1);
   return `grid grid-cols-1 md:grid-cols-${Math.min(columns, 12)} gap-6 p-1 items-start w-full`;
 });
 
@@ -728,7 +782,11 @@ const getDisabledState = (field: FormField | undefined) =>
   computed(() => {
     if (!field) return false;
 
-    if (field.attributes && "readonly" in field.attributes && field.attributes.readonly) {
+    if (
+      field.attributes &&
+      "readonly" in field.attributes &&
+      field.attributes.readonly
+    ) {
       return true;
     }
 
@@ -776,7 +834,9 @@ onUnmounted(() => {
   <div :class="cn('w-full p-2', props.class)">
     <template v-if="props.loading">
       <div class="flex items-center justify-center py-12">
-        <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-primary" />
+        <div
+          class="animate-spin rounded-full h-10 w-10 border-t-2 border-primary"
+        />
         <span class="ml-3 text-muted-foreground text-lg">Loading...</span>
       </div>
     </template>
@@ -792,7 +852,10 @@ onUnmounted(() => {
           v-for="(group, groupIndex) in groupedFields"
           :key="group.groupName || 'ungrouped'"
         >
-          <div v-if="group.groupName" class="col-span-full border-b-2 border-primary/30">
+          <div
+            v-if="group.groupName"
+            class="col-span-full border-b-2 border-primary/30"
+          >
             <h3 class="text-lg font-semibold text-foreground capitalize">
               {{ group.groupName.replace(/_/g, " ") }}
             </h3>
@@ -803,7 +866,10 @@ onUnmounted(() => {
               class="space-y-2 animate-slide-in"
               :class="[field.colSpan ? `col-span-${field.colSpan}` : '']"
             >
-              <div v-if="field.type !== 'component' && field.label" class="flex items-center gap-3">
+              <div
+                v-if="field.type !== 'component' && field.label"
+                class="flex items-center gap-3"
+              >
                 <Label
                   :for="field.type === 'date' ? '' : field.name"
                   :name="field.name"
@@ -811,7 +877,8 @@ onUnmounted(() => {
                   :class="{
                     'text-destructive':
                       (touched[field.name] ||
-                        (props.externalErrors && props.externalErrors[field.name])) &&
+                        (props.externalErrors &&
+                          props.externalErrors[field.name])) &&
                       allErrors[field.name],
                   }"
                 >
@@ -834,12 +901,18 @@ onUnmounted(() => {
                     side="top"
                     class="max-w-xs bg-background border shadow-sm p-2 rounded-md"
                   >
-                    <p class="text-sm text-muted-foreground">{{ field.helpText }}</p>
+                    <p class="text-sm text-muted-foreground">
+                      {{ field.helpText }}
+                    </p>
                   </TooltipContent>
                 </Tooltip>
               </div>
 
-              <template v-if="['text', 'number', 'email', 'password'].includes(field.type)">
+              <template
+                v-if="
+                  ['text', 'number', 'email', 'password'].includes(field.type)
+                "
+              >
                 <div class="relative">
                   <Iconify
                     v-if="field.icon"
@@ -865,19 +938,22 @@ onUnmounted(() => {
                       'pl-10': field.icon,
                       'border-destructive/40 hover:border-destructive/50 focus:ring-destructive/20 focus:border-destructive':
                         (touched[field.name] ||
-                          (props.externalErrors && props.externalErrors[field.name])) &&
+                          (props.externalErrors &&
+                            props.externalErrors[field.name])) &&
                         allErrors[field.name],
                     }"
                     :aria-invalid="
                       (touched[field.name] ||
-                        (props.externalErrors && props.externalErrors[field.name])) &&
+                        (props.externalErrors &&
+                          props.externalErrors[field.name])) &&
                       allErrors[field.name]
                         ? 'true'
                         : 'false'
                     "
                     :data-error="
                       (touched[field.name] ||
-                        (props.externalErrors && props.externalErrors[field.name])) &&
+                        (props.externalErrors &&
+                          props.externalErrors[field.name])) &&
                       allErrors[field.name]
                     "
                     :aria-describedby="`${field.name}-error`"
@@ -903,11 +979,14 @@ onUnmounted(() => {
                     :class="{
                       'border-destructive ring-destructive/20':
                         (touched[field.name] ||
-                          (props.externalErrors && props.externalErrors[field.name])) &&
+                          (props.externalErrors &&
+                            props.externalErrors[field.name])) &&
                         allErrors[field.name],
                     }"
                   >
-                    <SelectValue :placeholder="field.placeholder || 'Select an option'" />
+                    <SelectValue
+                      :placeholder="field.placeholder || 'Select an option'"
+                    />
                   </SelectTrigger>
                   <SelectContent
                     class="bg-background border border-input shadow-sm rounded-md w-full"
@@ -923,7 +1002,9 @@ onUnmounted(() => {
                 </Select>
               </template>
 
-              <template v-else-if="['multi-select', 'tree-select'].includes(field.type)">
+              <template
+                v-else-if="['multi-select', 'tree-select'].includes(field.type)"
+              >
                 <MultiSelect
                   v-model="formData[field.name]"
                   :options="field.options || []"
@@ -939,7 +1020,8 @@ onUnmounted(() => {
                   :class="{
                     'border-destructive/40 hover:border-destructive/50 focus:ring-destructive/20 focus:border-destructive':
                       (touched[field.name] ||
-                        (props.externalErrors && props.externalErrors[field.name])) &&
+                        (props.externalErrors &&
+                          props.externalErrors[field.name])) &&
                       allErrors[field.name],
                   }"
                   :aria-label="field.label"
@@ -959,7 +1041,8 @@ onUnmounted(() => {
                   :class="{
                     'border-destructive/40 hover:border-destructive/50 focus:ring-destructive/20 focus:border-destructive':
                       (touched[field.name] ||
-                        (props.externalErrors && props.externalErrors[field.name])) &&
+                        (props.externalErrors &&
+                          props.externalErrors[field.name])) &&
                       allErrors[field.name],
                   }"
                   :aria-label="field.label"
@@ -968,7 +1051,9 @@ onUnmounted(() => {
                 />
               </template>
 
-              <template v-else-if="['file', 'multiple-file'].includes(field.type)">
+              <template
+                v-else-if="['file', 'multiple-file'].includes(field.type)"
+              >
                 <div class="space-y-2">
                   <Label
                     :for="field.name"
@@ -976,7 +1061,8 @@ onUnmounted(() => {
                     :class="{
                       'border-destructive/40 bg-destructive/5 hover:border-destructive/50':
                         (touched[field.name] ||
-                          (props.externalErrors && props.externalErrors[field.name])) &&
+                          (props.externalErrors &&
+                            props.externalErrors[field.name])) &&
                         allErrors[field.name],
                       'opacity-50 cursor-not-allowed': field.disabled,
                     }"
@@ -990,10 +1076,15 @@ onUnmounted(() => {
                       <span class="text-sm font-medium text-foreground">
                         {{
                           field.placeholder ||
-                          (field.type === "multiple-file" ? "Choose files" : "Choose file")
+                          (field.type === "multiple-file"
+                            ? "Choose files"
+                            : "Choose file")
                         }}
                       </span>
-                      <p v-if="field.accept" class="text-xs text-muted-foreground mt-1">
+                      <p
+                        v-if="field.accept"
+                        class="text-xs text-muted-foreground mt-1"
+                      >
                         Accepted: {{ field.accept }}
                       </p>
                     </div>
@@ -1011,14 +1102,19 @@ onUnmounted(() => {
                       handleInput(
                         field,
                         field.type === 'multiple-file'
-                          ? Array.from(($event.target as HTMLInputElement)?.files || [])
+                          ? Array.from(
+                              ($event.target as HTMLInputElement)?.files || [],
+                            )
                           : ($event.target as HTMLInputElement)?.files?.[0],
                       )
                     "
                     @blur="handleBlur(field)"
                     class="hidden"
                   />
-                  <div v-if="filePreviews[field.name]?.length" class="grid grid-cols-2 gap-3 mt-3">
+                  <div
+                    v-if="filePreviews[field.name]?.length"
+                    class="grid grid-cols-2 gap-3 mt-3"
+                  >
                     <div
                       v-for="(preview, index) in filePreviews[field.name]"
                       :key="index"
@@ -1030,14 +1126,18 @@ onUnmounted(() => {
                         :alt="preview.name"
                         class="w-full h-20 object-cover rounded-md"
                       />
-                      <div v-else class="h-20 flex flex-col items-center justify-center bg-muted">
+                      <div
+                        v-else
+                        class="h-20 flex flex-col items-center justify-center bg-muted"
+                      >
                         <component
                           :is="getFileIcon(preview)"
                           class="h-6 w-6 text-muted-foreground"
                         />
-                        <span class="text-xs text-center truncate w-full px-2">{{
-                          preview.name
-                        }}</span>
+                        <span
+                          class="text-xs text-center truncate w-full px-2"
+                          >{{ preview.name }}</span
+                        >
                         <span class="text-xs text-muted-foreground">{{
                           formatFileSize(preview.size)
                         }}</span>
@@ -1048,7 +1148,10 @@ onUnmounted(() => {
                         class="absolute top-1 right-1 bg-background/80 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                         @click="removeFile(field, index)"
                       >
-                        <Iconify icon="mdi-close" class="h-4 w-4 text-destructive" />
+                        <Iconify
+                          icon="mdi-close"
+                          class="h-4 w-4 text-destructive"
+                        />
                       </Button>
                     </div>
                   </div>
@@ -1056,7 +1159,10 @@ onUnmounted(() => {
               </template>
 
               <template v-else-if="field.type === 'date'">
-                <Popover :name="field.name" v-model:open="popoverOpen[field.name]">
+                <Popover
+                  :name="field.name"
+                  v-model:open="popoverOpen[field.name]"
+                >
                   <PopoverTrigger as-child>
                     <Button
                       variant="outline"
@@ -1066,7 +1172,8 @@ onUnmounted(() => {
                           'form-field w-full px-4 py-2.5 rounded-lg text-left flex items-center min-h-[46px]',
                           !formData[field.name] && 'text-muted-foreground',
                           (touched[field.name] ||
-                            (props.externalErrors && props.externalErrors[field.name])) &&
+                            (props.externalErrors &&
+                              props.externalErrors[field.name])) &&
                             allErrors[field.name] &&
                             'border-destructive/40 hover:border-destructive/50 focus:ring-destructive/20 focus:border-destructive',
                           field.disabled && 'opacity-50 cursor-not-allowed',
@@ -1077,9 +1184,14 @@ onUnmounted(() => {
                       v-bind="field.attributes"
                     >
                       <span class="text-left flex-1">{{
-                        formData[field.name] ? formatDate(formData[field.name]) : "Pick a date"
+                        formData[field.name]
+                          ? formatDate(formData[field.name])
+                          : "Pick a date"
                       }}</span>
-                      <Iconify icon="mdi-calendar" class="size-4 text-muted-foreground" />
+                      <Iconify
+                        icon="mdi-calendar"
+                        class="size-4 text-muted-foreground"
+                      />
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent
@@ -1089,7 +1201,9 @@ onUnmounted(() => {
                     <Calendar
                       :key="field.dateLayout"
                       :model-value="getCalendarDateValue(field.name)"
-                      :default-placeholder="toCalendarDate(field?.placeholder || 'Pick a date')"
+                      :default-placeholder="
+                        toCalendarDate(field?.placeholder || 'Pick a date')
+                      "
                       @update:modelValue="
                         (value) => {
                           setDateFromCalendar(field.name, value);
@@ -1120,9 +1234,11 @@ onUnmounted(() => {
                   class="h-4 w-4 border-input"
                   v-bind="field.attributes"
                 />
-                <Label :for="field.name" class="text-sm font-medium text-foreground">{{
-                  field.label
-                }}</Label>
+                <Label
+                  :for="field.name"
+                  class="text-sm font-medium text-foreground"
+                  >{{ field.label }}</Label
+                >
               </template>
 
               <template v-else-if="field.type === 'radio'">
@@ -1171,7 +1287,11 @@ onUnmounted(() => {
                     'border-destructive/40 hover:border-destructive/50 focus:ring-destructive/20 focus:border-destructive':
                       touched[field.name] && allErrors[field.name],
                   }"
-                  :aria-invalid="touched[field.name] && allErrors[field.name] ? 'true' : 'false'"
+                  :aria-invalid="
+                    touched[field.name] && allErrors[field.name]
+                      ? 'true'
+                      : 'false'
+                  "
                   :aria-describedby="`${field.name}-error`"
                 />
               </template>
@@ -1188,13 +1308,17 @@ onUnmounted(() => {
                     class="data-[state=checked]:bg-primary"
                     v-bind="field.attributes"
                   />
-                  <Label :for="field.name" class="text-sm font-medium text-foreground">{{
-                    field.label
-                  }}</Label>
+                  <Label
+                    :for="field.name"
+                    class="text-sm font-medium text-foreground"
+                    >{{ field.label }}</Label
+                  >
                 </div>
               </template>
 
-              <template v-else-if="field.type === 'component' && field.component">
+              <template
+                v-else-if="field.type === 'component' && field.component"
+              >
                 <component
                   :is="field.component"
                   :model-value="formData"
@@ -1216,7 +1340,8 @@ onUnmounted(() => {
                 v-if="
                   field.type !== 'component' &&
                   (touched[field.name] ||
-                    (props.externalErrors && props.externalErrors[field.name])) &&
+                    (props.externalErrors &&
+                      props.externalErrors[field.name])) &&
                   allErrors[field.name]
                 "
               >
@@ -1238,7 +1363,9 @@ onUnmounted(() => {
         </template>
 
         <div
-          v-if="isEditMode && (props.config.showSubmit || props.config.showReset)"
+          v-if="
+            isEditMode && (props.config.showSubmit || props.config.showReset)
+          "
           class="flex justify-end gap-3 mt-6"
         >
           <Button
@@ -1261,7 +1388,10 @@ onUnmounted(() => {
           :key="group.groupName || 'ungrouped'"
         >
           <!-- Group Header -->
-          <div v-if="group.groupName" class="mt-6 mb-4 pb-2 border-b border-border">
+          <div
+            v-if="group.groupName"
+            class="mt-6 mb-4 pb-2 border-b border-border"
+          >
             <h3 class="text-lg font-semibold text-foreground capitalize">
               {{ group.groupName.replace(/_/g, " ") }}
             </h3>
@@ -1271,7 +1401,9 @@ onUnmounted(() => {
           <template v-for="field in group.fields" :key="field.name">
             <div class="space-y-3 animate-slide-in">
               <div class="flex items-center gap-3">
-                <Label class="font-medium text-foreground">{{ field.label }}</Label>
+                <Label class="font-medium text-foreground">{{
+                  field.label
+                }}</Label>
                 <Tooltip v-if="field.helpText">
                   <TooltipTrigger>
                     <Iconify
@@ -1283,23 +1415,41 @@ onUnmounted(() => {
                     side="top"
                     class="max-w-xs bg-background border shadow-sm p-2 rounded-md"
                   >
-                    <p class="text-sm text-muted-foreground">{{ field.helpText }}</p>
+                    <p class="text-sm text-muted-foreground">
+                      {{ field.helpText }}
+                    </p>
                   </TooltipContent>
                 </Tooltip>
               </div>
 
               <div class="p-3 rounded-md border border-input bg-background">
                 <p
-                  v-if="['text', 'number', 'email', 'password', 'textarea'].includes(field.type)"
+                  v-if="
+                    [
+                      'text',
+                      'number',
+                      'email',
+                      'password',
+                      'textarea',
+                    ].includes(field.type)
+                  "
                   class="text-sm text-foreground"
                 >
                   {{ formData[field.name] || "Not provided" }}
                 </p>
-                <p v-else-if="field.type === 'select'" class="text-sm text-foreground">
-                  {{ getOptionLabel(field, formData[field.name]) || "Not selected" }}
+                <p
+                  v-else-if="field.type === 'select'"
+                  class="text-sm text-foreground"
+                >
+                  {{
+                    getOptionLabel(field, formData[field.name]) ||
+                    "Not selected"
+                  }}
                 </p>
                 <div
-                  v-else-if="['multi-select', 'tree-select'].includes(field.type)"
+                  v-else-if="
+                    ['multi-select', 'tree-select'].includes(field.type)
+                  "
                   class="flex flex-wrap gap-2"
                 >
                   <Badge
@@ -1312,7 +1462,10 @@ onUnmounted(() => {
                   >
                     {{ getOptionLabel(field, value) }}
                   </Badge>
-                  <p v-if="!formData[field.name]?.length" class="text-sm text-muted-foreground">
+                  <p
+                    v-if="!formData[field.name]?.length"
+                    class="text-sm text-muted-foreground"
+                  >
                     None selected
                   </p>
                 </div>
@@ -1331,8 +1484,14 @@ onUnmounted(() => {
                       :alt="preview.name"
                       class="w-full h-20 object-cover rounded-md"
                     />
-                    <div v-else class="h-20 flex flex-col items-center justify-center bg-muted">
-                      <component :is="getFileIcon(preview)" class="h-6 w-6 text-muted-foreground" />
+                    <div
+                      v-else
+                      class="h-20 flex flex-col items-center justify-center bg-muted"
+                    >
+                      <component
+                        :is="getFileIcon(preview)"
+                        class="h-6 w-6 text-muted-foreground"
+                      />
                       <span class="text-xs text-center truncate w-full px-2">{{
                         preview.name
                       }}</span>
@@ -1341,12 +1500,22 @@ onUnmounted(() => {
                       }}</span>
                     </div>
                   </div>
-                  <p v-if="!filePreviews[field.name]?.length" class="text-sm text-muted-foreground">
+                  <p
+                    v-if="!filePreviews[field.name]?.length"
+                    class="text-sm text-muted-foreground"
+                  >
                     No files uploaded
                   </p>
                 </div>
-                <p v-else-if="field.type === 'date'" class="text-sm text-foreground">
-                  {{ formData[field.name] ? formatDate(formData[field.name]) : "Not selected" }}
+                <p
+                  v-else-if="field.type === 'date'"
+                  class="text-sm text-foreground"
+                >
+                  {{
+                    formData[field.name]
+                      ? formatDate(formData[field.name])
+                      : "Not selected"
+                  }}
                 </p>
                 <Badge
                   v-else-if="['checkbox', 'switch'].includes(field.type)"
@@ -1355,15 +1524,24 @@ onUnmounted(() => {
                 >
                   {{ formData[field.name] ? "Yes" : "No" }}
                 </Badge>
-                <p v-else-if="field.type === 'radio'" class="text-sm text-foreground">
-                  {{ getOptionLabel(field, formData[field.name]) || "Not selected" }}
+                <p
+                  v-else-if="field.type === 'radio'"
+                  class="text-sm text-foreground"
+                >
+                  {{
+                    getOptionLabel(field, formData[field.name]) ||
+                    "Not selected"
+                  }}
                 </p>
               </div>
             </div>
           </template>
 
           <!-- Separator after group (except for last group) -->
-          <div v-if="groupIndex < groupedFields.length - 1" class="my-6 border-t border-border" />
+          <div
+            v-if="groupIndex < groupedFields.length - 1"
+            class="my-6 border-t border-border"
+          />
         </template>
       </div>
     </template>
