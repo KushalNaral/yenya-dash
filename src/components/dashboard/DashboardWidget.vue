@@ -16,7 +16,11 @@
             accentClass,
           ]"
         >
-          <component :is="iconComponent" v-if="iconComponent" class="h-3.5 w-3.5 opacity-90" />
+          <component
+            :is="iconComponent"
+            v-if="iconComponent"
+            class="h-3.5 w-3.5 opacity-90"
+          />
           <h3 class="font-bold text-[10px] tracking-wider uppercase">
             {{ title }}
           </h3>
@@ -69,10 +73,14 @@
               v-if="item.subLabel"
               class="flex flex-col items-end mr-1 opacity-60 group-hover/row:opacity-100 transition-opacity"
             >
-              <span class="text-[8px] uppercase font-bold text-gray-400 leading-none">
+              <span
+                class="text-[8px] uppercase font-bold text-gray-400 leading-none"
+              >
                 {{ item.subLabel }}
               </span>
-              <span class="text-[10px] font-extrabold text-gray-600 leading-tight">
+              <span
+                class="text-[10px] font-extrabold text-gray-600 leading-tight"
+              >
                 {{ item.subValue }}
               </span>
             </div>
@@ -109,8 +117,14 @@ import * as icons from "lucide-vue-next";
 const props = defineProps({
   title: { type: String, required: true },
   icon: { type: String, default: "Activity" },
-  headerBg: { type: String, default: "bg-gradient-to-r from-sky-50 to-blue-50" },
-  accentClass: { type: String, default: "bg-sky-100/50 border-sky-100/30 text-sky-900" },
+  headerBg: {
+    type: String,
+    default: "bg-gradient-to-r from-sky-50 to-blue-50",
+  },
+  accentClass: {
+    type: String,
+    default: "bg-sky-100/50 border-sky-100/30 text-sky-900",
+  },
   loading: { type: Boolean, default: false },
   items: {
     type: Array as () => Array<{
@@ -129,7 +143,9 @@ const props = defineProps({
 
 const emit = defineEmits(["item-click"]);
 
-const iconComponent = computed(() => (icons as any)[props.icon] || icons.Activity);
+const iconComponent = computed(
+  () => (icons as any)[props.icon] || icons.Activity,
+);
 const { Loader2, ChevronRight } = icons;
 </script>
 
