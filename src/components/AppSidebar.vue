@@ -285,6 +285,15 @@ const navItems = computed(() => {
     });
   }
 
+  if (authStore.hasPermission("list-stats")) {
+    items.push({
+      title: "Stats",
+      url: "/stats",
+      icon: "lucide:bar-chart",
+      permission: "list-stats",
+    });
+  }
+
   if (authStore.hasPermission("list-menus")) {
     items.push({
       title: "Menus",

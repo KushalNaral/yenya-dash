@@ -122,6 +122,12 @@ const routes = [
         meta: { requiresAuth: true, requiredPermission: "list-partners" },
       },
       {
+        path: "stats",
+        name: "Stats",
+        component: () => import("@/views/stats/Stats.vue"),
+        meta: { requiresAuth: true, requiredPermission: "list-stats" },
+      },
+      {
         path: "menus",
         name: "Menu",
         component: () => import("@/views/menus/Menu.vue"),
